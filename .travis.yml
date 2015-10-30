@@ -1,3 +1,5 @@
+sudo: required
+
 virtualenv:
   system_site_packages: true
 
