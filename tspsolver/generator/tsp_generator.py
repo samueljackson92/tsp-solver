@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial import distance_matrix
 
 
 class TSPGenerator:
@@ -22,10 +23,12 @@ class TSPGenerator:
         """Generate a new TSP dataset.
 
         This will generate a uniformly random matrix of shape (N, 2)
-        representing N 2D coordinates for cities.
+        representing N 2D coordinates for cities and a distance matrix for each
+        of the points in the dataset
 
-        :return: 2D dataset of city coordinates
-        :rtype: ndarray
+        :return: 2D dataset of city coordinates and a n by n distance matrix
+        :rtype: (ndarray, ndarray)
         """
-        return np.random.uniform(self._low, self._high,
-                                 size=(self._num_points, 2))
+        data = np.random.uniform(self._low, self._high, size=(self._num_points, 2))
+        distances = distance_matrix(data, data)
+        return data, distances

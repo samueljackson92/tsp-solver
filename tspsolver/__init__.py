@@ -5,3 +5,4 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Samuel Jackson'
 
 import generator
+import ga
