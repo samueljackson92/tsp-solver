@@ -46,7 +46,6 @@ class RouletteWheelSelectionTest(unittest.TestCase):
     def test_selection(self):
         selector = RouletteWheelSelection(self._distances, self._subset_size)
         subset = selector.selection(self._population)
-        print subset
 
         exp_shape = (self._subset_size, self._num_points)
         nose.tools.assert_equal(subset.shape, exp_shape)
