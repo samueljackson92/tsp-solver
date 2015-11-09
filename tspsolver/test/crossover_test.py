@@ -7,7 +7,7 @@ from ..ga.population_generation import SimplePopulationGenerator
 from ..ga.crossover import OnePointPMX
 
 
-class SimplePopulationGeneratorTest(unittest.TestCase):
+class SimpleCrossoverTest(unittest.TestCase):
 
     def setUp(self):
         self._num_points = 100
