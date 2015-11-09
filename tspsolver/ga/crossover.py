@@ -5,6 +5,9 @@ from abc import ABCMeta, abstractmethod
 class AbstractCrossover(object):
     __metaclass__ = ABCMeta
 
+    def __init__(self, pcross=0.6):
+        self._pcross = pcross
+
     def crossover(self, population):
         """Peform crossover between pairs in a population
 
@@ -12,8 +15,17 @@ class AbstractCrossover(object):
         :return: a new population with generated from the old one.
         :rtype: ndarray
         """
-        return np.array([self._crossover_for_chromosomes(x, y)
-                         for x, y in self._parent_generator(population)])
+
+        pop = []
+        for x, y in zip(population[::2], np.roll(population, -1, axis=0)[::2]):
+            if self._pcross > np.random.random():
+                c1, c2 = self._crossover_for_chromosomes(x, y)
+                pop.append(c1)
+                pop.append(c2)
+            else:
+                pop.append(x)
+                pop.append(y)
+        return np.array(pop)
 
     @abstractmethod
     def _crossover_for_chromosomes(self, x, y):
@@ -51,12 +63,18 @@ class OnePointPMX(AbstractCrossover):
 
     def _crossover_for_chromosomes(self, x, y):
         pivot = np.random.randint(x.size)
-        child = y.copy()
+        child1 = y.copy()
+        child2 = x.copy()
 
         for i in xrange(pivot):
             # set duplicate entry to be the one we're going to overwrite
-            child[child == x[i]] = child[i]
+            child1[child1 == x[i]] = child1[i]
             # crossover the gene
-            child[i] = x[i]
+            child1[i] = x[i]
 
-        return child
+            # set duplicate entry to be the one we're going to overwrite
+            child2[child2 == y[i]] = child2[i]
+            # crossover the gene
+            child2[i] = y[i]
+
+        return child1, child1
