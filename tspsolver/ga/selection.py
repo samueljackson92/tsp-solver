@@ -16,10 +16,6 @@ class AbstractSelection(object):
         self._population_size = distance_matrix.shape[0]
         self._subset_size = subset_size
 
-        if self._subset_size > self._population_size:
-            raise RuntimeError("Subset size cannot be larger than the \
-                                total popualtion size.")
-
     @abstractmethod
     def selection(self, population):
         """ Choose a subset of a population to breed from.
@@ -47,8 +43,7 @@ class AbstractSelection(object):
         :return: 1D array of fitness estimates
         :rtype: ndarray
         """
-
-        point_indices = zip(chromosome, np.roll(chromosome, 1))
+        point_indices = zip(chromosome, np.roll(chromosome, -1))
         distances = np.array([self._distance_matrix[i, j]
                              for i, j in point_indices])
         return distances.sum()
@@ -63,7 +58,9 @@ class AbstractSelection(object):
         :rtype: ndarray
         """
         total_fitness = fitness.sum()
-        return np.array([f / total_fitness for f in fitness])
+        fit_prob = np.array([(total_fitness - f) / total_fitness for f in fitness])
+        p = fit_prob / fit_prob.sum()
+        return p
 
 
 class RouletteWheelSelection(AbstractSelection):

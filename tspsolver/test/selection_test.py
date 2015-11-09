@@ -10,9 +10,9 @@ from ..ga.selection import RouletteWheelSelection
 class RouletteWheelSelectionTest(unittest.TestCase):
 
     def setUp(self):
-        self._num_points = 100
-        self._pop_size = 20
-        self._subset_size = 10
+        self._num_points = 10
+        self._pop_size = 5
+        self._subset_size = 3
 
         gen = TSPGenerator(self._num_points)
         self._data, self._distances = gen.generate()
@@ -40,12 +40,10 @@ class RouletteWheelSelectionTest(unittest.TestCase):
     def test_evaluate_fitness(self):
         selector = RouletteWheelSelection(self._distances, self._subset_size)
         fitness = selector.fitness(self._population)
-
-        nose.tools.assert_equal(fitness.size, 20)
+        nose.tools.assert_equal(fitness.size, self._pop_size)
 
     def test_selection(self):
         selector = RouletteWheelSelection(self._distances, self._subset_size)
         subset = selector.selection(self._population)
-
         exp_shape = (self._subset_size, self._num_points)
         nose.tools.assert_equal(subset.shape, exp_shape)
