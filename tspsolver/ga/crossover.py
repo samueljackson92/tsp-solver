@@ -77,4 +77,26 @@ class OnePointPMX(AbstractCrossover):
             # crossover the gene
             child2[i] = y[i]
 
-        return child1, child1
+        return child1, child2
+
+
+class TwoPointPMX(AbstractCrossover):
+    """Create a new population using one point PMX crossover. The pivot location
+    of the split is determined uniformly at random.
+    """
+
+    def _crossover_for_chromosomes(self, x, y):
+        pivot1 = np.random.randint(x.size/2)
+        pivot2 = np.random.randint(x.size/2, x.size)
+        child1 = y.copy()
+        child2 = x.copy()
+
+        for i in xrange(pivot1, pivot2):
+            # set duplicate entry to be the one we're going to overwrite
+            child1[child1 == x[i]] = child1[i]
+            # crossover the gene
+            child1[i] = x[i]
+
+            child2[child2 == y[i]] = child2[i]
+            child2[i] = y[i]
+        return child1, child2
