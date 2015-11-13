@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 class AbstractSelection(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, distance_matrix, subset_size):
+    def __init__(self, distance_matrix, subset_size, **kwargs):
         """Create a new selection technique.
 
         :param distance_matrix: the distance matrix of points in the dataset
@@ -36,6 +36,13 @@ class AbstractSelection(object):
         """
         return np.array([self._fitness_for_chromosome(x) for x in population])
 
+    def get_fitness(self):
+        """Get the cached fitness of the most recent population.
+
+        :return: the fitness for a population
+        """
+        return self._fitness
+
     def _fitness_for_chromosome(self, chromosome):
         """Compute the fitness for a single chromosome
 
@@ -64,6 +71,11 @@ class AbstractSelection(object):
 
 
 class RouletteWheelSelection(AbstractSelection):
+    """Roulette Wheel Selection
+
+    Implements fitness propotionate or "roulette wheel" selection. Individuals
+    are selected with probability that is directly proportional to their fitness
+    """
 
     def _choose_subset(self, population, fit_prob):
         """Choose a random subset of te population weighted by their fitness
@@ -86,3 +98,41 @@ class RouletteWheelSelection(AbstractSelection):
         fitness = self.fitness(population)
         fit_prob = self._normalise_fitness(fitness)
         return self._choose_subset(population, fit_prob)
+
+
+class TournamentSelection(AbstractSelection):
+
+    def __init__(self, *args, **kwargs):
+        AbstractSelection.__init__(self, *args, **kwargs)
+        self._tournament_size = kwargs.get('tournament_size', 3)
+        self._winner_prob = kwargs.get('winner_prob', 1.0)
+
+    def _find_tournament_chromosomes(self):
+        """Select chromosomes for a torunament at random
+
+        :return: 1darray of indicies for chromosomes the same size as the
+            tournament size.
+        """
+        idx = np.random.choice(self._population_size,
+                               size=self._tournament_size,
+                               replace=False)
+        return idx
+
+    def _run_tournament(self, population, fitness):
+        """Run a single tournament
+
+        :param population: 2darray of chromosomes
+        :param population: 1darray of fitness ratings for the population
+        :return: the chromosome that won the tournament.
+        """
+        idx = self._find_tournament_chromosomes()
+        winner_index = np.argmax(fitness[idx], axis=0)
+        return population[winner_index]
+
+    def selection(self, population):
+        self._population_size = population.shape[0]
+        self._fitness = self.fitness(population)
+
+        new_pop = np.array([self._run_tournament(population, self._fitness)
+                            for i in xrange(self._subset_size)])
+        return new_pop
