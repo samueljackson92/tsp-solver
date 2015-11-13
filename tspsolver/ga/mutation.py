@@ -44,3 +44,26 @@ class SwapCityMutation(AbstractMutation):
         b = np.random.randint(chromosome.size)
         chromosome[a], chromosome[b] = chromosome[b], chromosome[a]
         return chromosome
+
+
+class SwapAdjacentCityMutation(AbstractMutation):
+    """Mutate indivudals in a population by randomly swapping two genes.
+    """
+
+    def mutate(self, population):
+        for i, row in enumerate(population):
+            if np.random.random() < self._mutation_prob:
+                population[i] = self._swap_random_genes(row)
+        return population
+
+    def _swap_random_genes(self, chromosome):
+        """Randomly swap two genes
+
+        :param chromosome: 1D array representing a chromosome to mutate
+        :return: 1D array representing the modified chromosome
+        :rtype: ndarray
+        """
+        a = np.random.randint(chromosome.size)
+        b = (a+1) % chromosome.size
+        chromosome[a], chromosome[b] = chromosome[b], chromosome[a]
+        return chromosome
