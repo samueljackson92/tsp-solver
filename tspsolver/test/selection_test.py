@@ -4,7 +4,7 @@ import numpy as np
 
 from ..generator.tsp_generator import TSPGenerator
 from ..ga.population_generation import SimplePopulationGenerator
-from ..ga.selection import RouletteWheelSelection
+from ..ga.selection import RouletteWheelSelection, TournamentSelection
 
 
 class RouletteWheelSelectionTest(unittest.TestCase):
@@ -45,5 +45,26 @@ class RouletteWheelSelectionTest(unittest.TestCase):
     def test_selection(self):
         selector = RouletteWheelSelection(self._distances, self._subset_size)
         subset = selector.selection(self._population)
+        exp_shape = (self._subset_size, self._num_points)
+        nose.tools.assert_equal(subset.shape, exp_shape)
+
+
+class TournamentSelectionTest(unittest.TestCase):
+
+    def setUp(self):
+        self._num_points = 10
+        self._pop_size = 5
+        self._subset_size = 3
+
+        gen = TSPGenerator(self._num_points)
+        self._data, self._distances = gen.generate()
+
+        popGen = SimplePopulationGenerator(self._pop_size, self._distances)
+        self._population = popGen.generate()
+
+    def test_selection(self):
+        selector = TournamentSelection(self._distances, self._subset_size)
+        subset = selector.selection(self._population)
+
         exp_shape = (self._subset_size, self._num_points)
         nose.tools.assert_equal(subset.shape, exp_shape)
