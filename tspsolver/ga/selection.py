@@ -2,7 +2,7 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 
 
-class AbstractSelection(object):
+class AbstractSelectionOperator(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, subset_size, **kwargs):
@@ -81,7 +81,7 @@ class AbstractSelection(object):
         return p
 
 
-class RouletteWheelSelection(AbstractSelection):
+class RouletteWheelSelection(AbstractSelectionOperator):
     """Roulette Wheel Selection
 
     Implements fitness propotionate or "roulette wheel" selection. Individuals
@@ -111,10 +111,10 @@ class RouletteWheelSelection(AbstractSelection):
         return self._choose_subset(population, fit_prob)
 
 
-class TournamentSelection(AbstractSelection):
+class TournamentSelection(AbstractSelectionOperator):
 
     def __init__(self, *args, **kwargs):
-        AbstractSelection.__init__(self, *args, **kwargs)
+        AbstractSelectionOperator.__init__(self, *args, **kwargs)
         self._tournament_size = kwargs.get('tournament_size', 3)
         self._winner_prob = kwargs.get('winner_prob', 1.0)
 
