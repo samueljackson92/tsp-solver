@@ -2,7 +2,7 @@ import unittest
 import nose.tools
 import numpy as np
 
-from ..generator.tsp_generator import TSPGenerator
+from ..tsp_generator import TSPGenerator
 from ..ga.population_generation import SimplePopulationGenerator
 from ..ga.selection import RouletteWheelSelection, TournamentSelection
 

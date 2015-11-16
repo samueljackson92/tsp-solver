@@ -7,7 +7,7 @@ import json
 from scipy.spatial import distance_matrix
 
 from simulator_loader import SimulatorLoader
-from generator.tsp_generator import TSPGenerator
+from tsp_generator import TSPGenerator
 from ga.plotting import plot_fitness, plot_solution
 
 logging.basicConfig(level=logging.INFO,
