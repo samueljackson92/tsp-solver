@@ -16,8 +16,8 @@ class SwapCityMutationTest(unittest.TestCase):
         gen = TSPGenerator(self._num_points)
         self._data, self._distances = gen.generate()
 
-        popGen = SimplePopulationGenerator(self._pop_size, self._distances)
-        self._population = popGen.generate()
+        popGen = SimplePopulationGenerator(self._pop_size)
+        self._population = popGen.generate(self._distances[0])
 
     def test_mutate(self):
         swap_city = SwapCityMutation(1.0)
@@ -36,8 +36,8 @@ class SwapAdjacentCityMutationTest(unittest.TestCase):
         gen = TSPGenerator(self._num_points)
         self._data, self._distances = gen.generate()
 
-        popGen = SimplePopulationGenerator(self._pop_size, self._distances)
-        self._population = popGen.generate()
+        popGen = SimplePopulationGenerator(self._pop_size)
+        self._population = popGen.generate(self._distances[0])
 
     def test_mutate(self):
         swap_city = SwapAdjacentCityMutation(1.0)
