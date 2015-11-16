@@ -5,26 +5,37 @@ from abc import ABCMeta, abstractmethod
 class AbstractSelection(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, distance_matrix, subset_size, **kwargs):
+    def __init__(self, subset_size, **kwargs):
         """Create a new selection technique.
 
-        :param distance_matrix: the distance matrix of points in the dataset
         :param subset_size: the size of the subset of the population to use.
         """
-
-        self._distance_matrix = distance_matrix
-        self._population_size = distance_matrix.shape[0]
         self._subset_size = subset_size
 
-    @abstractmethod
-    def selection(self, population):
+    def selection(self, population, distance_matrix):
         """ Choose a subset of a population to breed from.
+
+        :param population: 2D array representing the population of solutions.
+        :param distance_matrix: the distance matrix of points in the dataset
+        :return: a subset of the population which are the fittest
+        :rtype: ndarray
+        """
+        self._distance_matrix = distance_matrix
+        self._population_size = population.shape[0]
+        self._fitness = self.fitness(population)
+        return self._apply_selection(population)
+
+    @abstractmethod
+    def _apply_selection(self, population):
+        """ Choose a subset of a population to breed from.
+
+        This abstract method must be implemented by deriving classes and
+        provides the code to actually select chromosomes.
 
         :param population: 2D array representing the population of solutions.
         :return: a subset of the population which are the fittest
         :rtype: ndarray
         """
-        pass
 
     def fitness(self, population):
         """ Evaluate the fitness of a population
@@ -94,7 +105,7 @@ class RouletteWheelSelection(AbstractSelection):
         idx = np.random.choice(indicies, size=self._subset_size, p=fit_prob)
         return population[idx]
 
-    def selection(self, population):
+    def _apply_selection(self, population):
         fitness = self.fitness(population)
         fit_prob = self._normalise_fitness(fitness)
         return self._choose_subset(population, fit_prob)
@@ -129,10 +140,7 @@ class TournamentSelection(AbstractSelection):
         winner_index = np.argmax(fitness[idx], axis=0)
         return population[winner_index]
 
-    def selection(self, population):
-        self._population_size = population.shape[0]
-        self._fitness = self.fitness(population)
-
+    def _apply_selection(self, population):
         new_pop = np.array([self._run_tournament(population, self._fitness)
                             for i in xrange(self._subset_size)])
         return new_pop

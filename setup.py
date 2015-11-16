@@ -13,9 +13,14 @@ config = {
     'author_email': 'samueljackson@outlook.com',
     'version': tspsolver.__version__,
     'install_requires': [
-	    'numpy',
-	    'scipy'
+        'numpy',
+        'scipy',
+        'Click'
     ],
+    'entry_points': '''
+        [console_scripts]
+        tspsolver=tspsolver.command:cli
+    ''',
     'packages': ['tspsolver'],
     'name': 'tspsolver'
 }
