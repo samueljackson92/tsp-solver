@@ -12,7 +12,6 @@ class AbstractMutationOperator(object):
         """
         self._mutation_prob = pmutate
 
-    @abstractmethod
     def mutate(self, population):
         """ Randomly mutate chromosomes in a population.
 
@@ -20,6 +19,13 @@ class AbstractMutationOperator(object):
         :return: mutated population
         :rtype: ndarray
         """
+        for i, row in enumerate(population):
+            if np.random.random() < self._mutation_prob:
+                population[i] = self._perform_mutation(row)
+        return population
+
+    @abstractmethod
+    def _perform_mutation(self, chromosome):
         pass
 
 
@@ -27,13 +33,7 @@ class SwapCityMutation(AbstractMutationOperator):
     """Mutate indivudals in a population by randomly swapping two genes.
     """
 
-    def mutate(self, population):
-        for i, row in enumerate(population):
-            if np.random.random() < self._mutation_prob:
-                population[i] = self._swap_random_genes(row)
-        return population
-
-    def _swap_random_genes(self, chromosome):
+    def _perform_mutation(self, chromosome):
         """Randomly swap two genes
 
         :param chromosome: 1D array representing a chromosome to mutate
@@ -50,13 +50,7 @@ class SwapAdjacentCityMutation(AbstractMutationOperator):
     """Mutate indivudals in a population by randomly swapping two genes.
     """
 
-    def mutate(self, population):
-        for i, row in enumerate(population):
-            if np.random.random() < self._mutation_prob:
-                population[i] = self._swap_random_genes(row)
-        return population
-
-    def _swap_random_genes(self, chromosome):
+    def _perform_mutation(self, chromosome):
         """Randomly swap two genes
 
         :param chromosome: 1D array representing a chromosome to mutate
@@ -74,13 +68,7 @@ class DisplacementMutation(AbstractMutationOperator):
     chromosome.
     """
 
-    def mutate(self, population):
-        for i, row in enumerate(population):
-            if np.random.random() < self._mutation_prob:
-                population[i] = self._displace_subtour(row)
-        return population
-
-    def _displace_subtour(self, chromosome):
+    def _perform_mutation(self, chromosome):
         """Randomly displace a subtour of the chromosome
 
         :param chromosome: 1D array representing a chromosome to mutate
@@ -105,13 +93,7 @@ class InversionMutation(AbstractMutationOperator):
     chromosome then reversing it.
     """
 
-    def mutate(self, population):
-        for i, row in enumerate(population):
-            if np.random.random() < self._mutation_prob:
-                population[i] = self._displace_and_invert_subtour(row)
-        return population
-
-    def _displace_and_invert_subtour(self, chromosome):
+    def _perform_mutation(self, chromosome):
         """Randomly displace a (reversed) subtour of the chromosome
 
         :param chromosome: 1D array representing a chromosome to mutate
@@ -136,13 +118,7 @@ class InsertionMutation(AbstractMutationOperator):
     a gene in a different part of the chromosome.
     """
 
-    def mutate(self, population):
-        for i, row in enumerate(population):
-            if np.random.random() < self._mutation_prob:
-                population[i] = self._random_insertion(row)
-        return population
-
-    def _random_insertion(self, chromosome):
+    def _perform_mutation(self, chromosome):
         """Randomly insert a gene in a different  of the chromosome
 
         :param chromosome: 1D array representing a chromosome to mutate
