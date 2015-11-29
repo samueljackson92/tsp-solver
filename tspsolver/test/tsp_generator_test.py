@@ -3,7 +3,7 @@ import nose.tools
 import numpy as np
 import scipy.stats as stats
 
-from ..generator.tsp_generator import TSPGenerator
+from ..tsp_generator import TSPGenerator
 
 
 class TSPGeneratorTest(unittest.TestCase):

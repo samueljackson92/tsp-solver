@@ -4,5 +4,5 @@ __author__ = 'Samuel Jackson'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Samuel Jackson'
 
-import generator
 import ga
+import command

@@ -2,7 +2,7 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 
 
-class AbstractCrossover(object):
+class AbstractCrossoverOperator(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, pcross=0.6):
@@ -56,7 +56,7 @@ class AbstractCrossover(object):
             yield population[x_idx], population[y_idx]
 
 
-class OnePointPMX(AbstractCrossover):
+class OnePointPMX(AbstractCrossoverOperator):
     """Create a new population using one point PMX crossover. The pivot location
     of the split is determined uniformly at random.
     """
@@ -80,7 +80,7 @@ class OnePointPMX(AbstractCrossover):
         return child1, child2
 
 
-class TwoPointPMX(AbstractCrossover):
+class TwoPointPMX(AbstractCrossoverOperator):
     """Create a new population using one point PMX crossover. The pivot location
     of the split is determined uniformly at random.
     """

@@ -2,7 +2,7 @@ import unittest
 import nose.tools
 import numpy as np
 
-from ..generator.tsp_generator import TSPGenerator
+from ..tsp_generator import TSPGenerator
 from ..ga.population_generation import SimplePopulationGenerator
 from ..ga.selection import RouletteWheelSelection, TournamentSelection
 
@@ -17,8 +17,8 @@ class RouletteWheelSelectionTest(unittest.TestCase):
         gen = TSPGenerator(self._num_points)
         self._data, self._distances = gen.generate()
 
-        popGen = SimplePopulationGenerator(self._pop_size, self._distances)
-        self._population = popGen.generate()
+        popGen = SimplePopulationGenerator(self._pop_size)
+        self._population = popGen.generate(self._distances.shape[0])
 
     def test_evaluate_simple_fitness(self):
         distances = np.array([[1., 1.41421356],
@@ -29,7 +29,8 @@ class RouletteWheelSelectionTest(unittest.TestCase):
                                [1, 0],
                                [1, 1]])
 
-        selector = RouletteWheelSelection(distances, 1)
+        selector = RouletteWheelSelection(1)
+        selector._distance_matrix = distances
         fitness = selector.fitness(population)
 
         nose.tools.assert_equal(fitness.size, 4)
@@ -38,13 +39,14 @@ class RouletteWheelSelectionTest(unittest.TestCase):
         np.testing.assert_array_equal(fitness, expected)
 
     def test_evaluate_fitness(self):
-        selector = RouletteWheelSelection(self._distances, self._subset_size)
+        selector = RouletteWheelSelection(self._subset_size)
+        selector._distance_matrix = self._distances
         fitness = selector.fitness(self._population)
         nose.tools.assert_equal(fitness.size, self._pop_size)
 
     def test_selection(self):
-        selector = RouletteWheelSelection(self._distances, self._subset_size)
-        subset = selector.selection(self._population)
+        selector = RouletteWheelSelection(self._subset_size)
+        subset = selector.selection(self._population, self._distances)
         exp_shape = (self._subset_size, self._num_points)
         nose.tools.assert_equal(subset.shape, exp_shape)
 
@@ -59,12 +61,12 @@ class TournamentSelectionTest(unittest.TestCase):
         gen = TSPGenerator(self._num_points)
         self._data, self._distances = gen.generate()
 
-        popGen = SimplePopulationGenerator(self._pop_size, self._distances)
-        self._population = popGen.generate()
+        popGen = SimplePopulationGenerator(self._pop_size)
+        self._population = popGen.generate(self._distances.shape[0])
 
     def test_selection(self):
-        selector = TournamentSelection(self._distances, self._subset_size)
-        subset = selector.selection(self._population)
+        selector = TournamentSelection(self._subset_size)
+        subset = selector.selection(self._population, self._distances)
 
         exp_shape = (self._subset_size, self._num_points)
         nose.tools.assert_equal(subset.shape, exp_shape)

@@ -58,3 +58,7 @@ target/
 bin/
 include/
 man/
+
+# Ignore config files for project
+*.txt
+*.json

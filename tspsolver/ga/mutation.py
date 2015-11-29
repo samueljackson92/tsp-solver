@@ -2,7 +2,7 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 
 
-class AbstractMutation(object):
+class AbstractMutationOperator(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, p=0.5):
@@ -23,7 +23,7 @@ class AbstractMutation(object):
         pass
 
 
-class SwapCityMutation(AbstractMutation):
+class SwapCityMutation(AbstractMutationOperator):
     """Mutate indivudals in a population by randomly swapping two genes.
     """
 
@@ -46,7 +46,7 @@ class SwapCityMutation(AbstractMutation):
         return chromosome
 
 
-class SwapAdjacentCityMutation(AbstractMutation):
+class SwapAdjacentCityMutation(AbstractMutationOperator):
     """Mutate indivudals in a population by randomly swapping two genes.
     """
 

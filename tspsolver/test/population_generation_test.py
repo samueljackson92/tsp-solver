@@ -2,7 +2,7 @@ import unittest
 import nose.tools
 import numpy as np
 
-from ..generator.tsp_generator import TSPGenerator
+from ..tsp_generator import TSPGenerator
 from ..ga.population_generation import SimplePopulationGenerator
 
 
@@ -16,8 +16,8 @@ class SimplePopulationGeneratorTest(unittest.TestCase):
         self._data, self._distances = gen.generate()
 
     def test_generate_population(self):
-        popGen = SimplePopulationGenerator(self._pop_size, self._distances)
-        population = popGen.generate()
+        popGen = SimplePopulationGenerator(self._pop_size)
+        population = popGen.generate(self._distances.shape[0])
 
         nose.tools.assert_equal(population.shape, (self._pop_size, self._num_points))
         unique_pop = find_unique_rows(population)
