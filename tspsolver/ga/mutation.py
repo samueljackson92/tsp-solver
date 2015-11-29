@@ -70,7 +70,8 @@ class SwapAdjacentCityMutation(AbstractMutationOperator):
 
 
 class DisplacementMutation(AbstractMutationOperator):
-    """Mutate indivudals in a population by randomly swapping two genes.
+    """Mutate indivudals in a population by randomly moving a subtour in the
+    chromosome.
     """
 
     def mutate(self, population):
@@ -95,5 +96,36 @@ class DisplacementMutation(AbstractMutationOperator):
         # insert in random position
         pos = np.random.randint(chromosome.size)
         parts = (chromosome[:pos], subtour, chromosome[pos:])
+        chromosome = np.concatenate(parts)
+        return chromosome
+
+
+class InversionMutation(AbstractMutationOperator):
+    """Mutate indivudals in a population by randomly moving a subtour in the
+    chromosome then reversing it.
+    """
+
+    def mutate(self, population):
+        for i, row in enumerate(population):
+            if np.random.random() < self._mutation_prob:
+                population[i] = self._displace_subtour(row)
+        return population
+
+    def _displace_subtour(self, chromosome):
+        """Randomly displace a (reversed) subtour of the chromosome
+
+        :param chromosome: 1D array representing a chromosome to mutate
+        :return: 1D array representing the modified chromosome
+        :rtype: ndarray
+        """
+        # choose random subtour
+        pivot1 = np.random.randint(chromosome.size/2)
+        pivot2 = np.random.randint(chromosome.size/2, chromosome.size)
+        subtour = chromosome[pivot1:pivot2]
+        chromosome = np.concatenate((chromosome[:pivot1], chromosome[pivot2:]))
+
+        # insert in random position and reverse
+        pos = np.random.randint(chromosome.size)
+        parts = (chromosome[:pos], subtour[::-1], chromosome[pos:])
         chromosome = np.concatenate(parts)
         return chromosome
