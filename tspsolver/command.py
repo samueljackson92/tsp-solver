@@ -6,6 +6,7 @@ import json
 import sys
 
 from tsp_generator import TSPGenerator
+from tuning import GeneticAlgorithmParameterEstimation
 from ga.simulator import Simulator
 from ga.plotting import plot_fitness, plot_solution
 
@@ -48,6 +49,15 @@ def load_parameter_file(file_name):
     return parameters
 
 
+def save_parameter_file(file_name, parameters):
+    with open(file_name, 'w') as param_file:
+        try:
+            json.dump(parameters, param_file)
+        except ValueError as e:
+            logger.error("Failed to save parameter file:\n %s", str(e))
+            sys.exit(1)
+
+
 @click.group()
 def cli():
     pass
@@ -83,3 +93,18 @@ def solve(parameter_file, dataset_file, num_points):
 
     plot_fitness(sim)
     plot_solution(data, solution)
+
+
+@cli.command()
+@click.argument("parameter-file")
+@click.argument("output-file")
+@click.option('--num-points', '-n', default=10,
+              help="Number of points to generate.")
+@click.option('--num-datasets', '-d', default=3,
+              help="Number of points to generate.")
+def tune(parameter_file, output_file, num_points, num_datasets):
+    params = load_parameter_file(parameter_file)
+    tuner = GeneticAlgorithmParameterEstimation(num_datasets=num_datasets,
+                                                dataset_size=num_points)
+    best_params = tuner.perform_grid_search(params)
+    save_parameter_file(output_file, best_params)
