@@ -1,6 +1,7 @@
 import unittest
 import nose.tools
 import numpy as np
+from scipy.spatial import distance_matrix
 
 from ..tsp_generator import TSPGenerator
 from ..ga.population_generation import SimplePopulationGenerator
@@ -13,7 +14,8 @@ class SimplePopulationGeneratorTest(unittest.TestCase):
         self._pop_size = 20
 
         gen = TSPGenerator(self._num_points)
-        self._data, self._distances = gen.generate()
+        self._data = gen.generate()
+        self._distances = distance_matrix(self._data, self._data)
 
     def test_generate_population(self):
         popGen = SimplePopulationGenerator(self._pop_size)

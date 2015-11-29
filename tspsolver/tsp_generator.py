@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.spatial import distance_matrix
 
 
 class TSPGenerator:
@@ -30,5 +29,4 @@ class TSPGenerator:
         :rtype: (ndarray, ndarray)
         """
         data = np.random.uniform(self._low, self._high, size=(self._num_points, 2))
-        distances = distance_matrix(data, data)
-        return data, distances
+        return data
