@@ -52,7 +52,7 @@ def load_parameter_file(file_name):
 def save_parameter_file(file_name, parameters):
     with open(file_name, 'w') as param_file:
         try:
-            json.dump(parameters, param_file)
+            json.dump(parameters, param_file, indent=4, separators=(',', ': '))
         except ValueError as e:
             logger.error("Failed to save parameter file:\n %s", str(e))
             sys.exit(1)
