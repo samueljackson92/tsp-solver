@@ -108,10 +108,10 @@ class InversionMutation(AbstractMutationOperator):
     def mutate(self, population):
         for i, row in enumerate(population):
             if np.random.random() < self._mutation_prob:
-                population[i] = self._displace_subtour(row)
+                population[i] = self._displace_and_invert_subtour(row)
         return population
 
-    def _displace_subtour(self, chromosome):
+    def _displace_and_invert_subtour(self, chromosome):
         """Randomly displace a (reversed) subtour of the chromosome
 
         :param chromosome: 1D array representing a chromosome to mutate
@@ -127,5 +127,35 @@ class InversionMutation(AbstractMutationOperator):
         # insert in random position and reverse
         pos = np.random.randint(chromosome.size)
         parts = (chromosome[:pos], subtour[::-1], chromosome[pos:])
+        chromosome = np.concatenate(parts)
+        return chromosome
+
+
+class InsertionMutation(AbstractMutationOperator):
+    """Mutate indivduals in a population by randomly removing and reinserting
+    a gene in a different part of the chromosome.
+    """
+
+    def mutate(self, population):
+        for i, row in enumerate(population):
+            if np.random.random() < self._mutation_prob:
+                population[i] = self._random_insertion(row)
+        return population
+
+    def _random_insertion(self, chromosome):
+        """Randomly insert a gene in a different  of the chromosome
+
+        :param chromosome: 1D array representing a chromosome to mutate
+        :return: 1D array representing the modified chromosome
+        :rtype: ndarray
+        """
+        # choose random gene
+        pos = np.random.randint(chromosome.size)
+        gene = chromosome[pos]
+        chromosome = np.delete(chromosome, pos)
+
+        # insert in random position
+        pos = np.random.randint(chromosome.size)
+        parts = (chromosome[:pos], np.array([gene]), chromosome[pos:])
         chromosome = np.concatenate(parts)
         return chromosome
