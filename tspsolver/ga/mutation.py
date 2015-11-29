@@ -5,12 +5,12 @@ from abc import ABCMeta, abstractmethod
 class AbstractMutationOperator(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, p=0.5):
+    def __init__(self, pmutate=0.5):
         """Create a new mutation technique.
 
         :param p: the probability of the mutation occuring
         """
-        self._mutation_prob = p
+        self._mutation_prob = pmutate
 
     @abstractmethod
     def mutate(self, population):

@@ -1,6 +1,7 @@
 import unittest
 import nose.tools
 import numpy as np
+from scipy.spatial import distance_matrix
 
 from ..tsp_generator import TSPGenerator
 from ..ga.population_generation import SimplePopulationGenerator
@@ -14,7 +15,8 @@ class SwapCityMutationTest(unittest.TestCase):
         self._pop_size = 5
 
         gen = TSPGenerator(self._num_points)
-        self._data, self._distances = gen.generate()
+        self._data = gen.generate()
+        self._distances = distance_matrix(self._data, self._data)
 
         popGen = SimplePopulationGenerator(self._pop_size)
         self._population = popGen.generate(self._distances[0])
@@ -34,7 +36,8 @@ class SwapAdjacentCityMutationTest(unittest.TestCase):
         self._pop_size = 5
 
         gen = TSPGenerator(self._num_points)
-        self._data, self._distances = gen.generate()
+        self._data = gen.generate()
+        self._distances = distance_matrix(self._data, self._data)
 
         popGen = SimplePopulationGenerator(self._pop_size)
         self._population = popGen.generate(self._distances[0])

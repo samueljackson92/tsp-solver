@@ -1,14 +1,14 @@
 import numpy as np
 import logging
 import time
+from scipy.spatial import distance_matrix
 
 logger = logging.getLogger(__name__)
 
 
-class Simulator:
+class Simulator():
 
-    def __init__(self, generator, selector, crossover, mutator,
-                 num_epochs=100, num_elites=2):
+    def __init__(self, **params):
         """Create a new simulator.
 
         This will setup a genetic algorithm with the necessary genetic operators
@@ -21,29 +21,23 @@ class Simulator:
         :param num_epochs: the number of interations to run the simulation.
         :param num_elites: the number of elite chromosomes to carry over.
         """
-        self._generator = generator
-        self._selector = selector
-        self._crossover = crossover
-        self._mutator = mutator
-        self._num_elites = num_elites
-        self._num_epochs = num_epochs
-
+        self.set_params(**params)
         self._average_fitness = []
         self._min_fitness = []
         self._max_fitness = []
 
-    def evolve(self, distance_matrix):
+    def evolve(self, data):
         """Evolve a solution to the TSP problem.
 
         :param distance_matrix: a distance matrix for the points in the dataset
         :return: chromosome representing the best solution found.
         :rtype: 1Darray
         """
-        population = self.initilize_population(distance_matrix)
+        dm = distance_matrix(data, data)
+        population = self.initilize_population(dm)
 
         for i in xrange(self._num_epochs):
-            population = self._apply_genetic_operations(population,
-                                                        distance_matrix)
+            population = self._apply_genetic_operations(population, dm)
             self._cache_epoch_performance(population)
             self._log_progress(i)
 
@@ -58,8 +52,9 @@ class Simulator:
         :param population: the current population of solutions
         """
         fitness = self._selector.get_fitness()
+        min_fitness = fitness.min()
         self._average_fitness.append(fitness.mean())
-        self._min_fitness.append(fitness.min())
+        self._min_fitness.append(min_fitness)
         self._max_fitness.append(fitness.max())
 
     def _log_progress(self, iteration):
@@ -182,3 +177,65 @@ class Simulator:
         :param population: the population to apply the operator too
         """
         return self._mutator.mutate(population)
+
+    def score(self, X):
+        """Score function runs the genetic algorithm and returns the best
+        fitness achieved.
+
+        This is useful in parameter tuning to evaluate the settings of the GA.
+
+        :param X: the data to run the GA with
+        :return: an integer representing the best fitness achieved by this GA
+        :rtype: Int
+        """
+        self.evolve(X)
+        return np.min(self._min_fitness)
+
+    def set_params(self, **parameters):
+        """Set the parameters of the GA
+
+        This takes a flat dictionary of keyword arguments for each of the
+        components of the GA. Parameters must be named according to the
+        convention '<component>_<param name>'. E.g. 'crossover_pcross'.
+
+        This format is require for integration with scikit-learn tools, such as
+        the ParameterGrid function.
+
+        :param parameters: dictionary of parameters for the GA.
+        """
+        self._params = parameters
+        # load params for simulator
+        self._num_elites = parameters['num_elites']
+        self._num_epochs = parameters['num_epochs']
+
+        # load params for sub components
+        self._generator = self.load_component('generator', self._params, 'population_generation')
+        self._selector = self.load_component('selector', self._params, 'selection')
+        self._crossover = self.load_component('crossover', self._params, 'crossover')
+        self._mutator = self.load_component('mutator', self._params, 'mutation')
+
+    def load_component(self, name, params, module_name):
+        """Loads a sub component of the GA.
+
+        This method dynamically sets up an instance of a class defined by the
+        parameters passed to the system.
+
+        :param name: the name of the type of component to load
+        :param params: the parameter dictionary defining the algorithm
+        :param module_name: the name of the python module to load from
+        :return: a new instance of the component with it's paramters set
+        :rtype: Object
+        """
+        module = __import__("tspsolver.ga.%s" % module_name, fromlist=[''])
+        class_obj = getattr(module, self._params[name])
+
+        params_for_class = {}
+        for key, value in params.iteritems():
+            if key.startswith(name + '_'):
+                # find all parameters matching the prefix of this sub component
+                # parameters for a sub component must begin with the component
+                # name
+                new_key = key.split(name + '_', 1)[1]
+                params_for_class[new_key] = value
+
+        return class_obj(**params_for_class)

@@ -1,6 +1,5 @@
 import unittest
 import nose.tools
-import numpy as np
 import scipy.stats as stats
 
 from ..tsp_generator import TSPGenerator
@@ -13,7 +12,7 @@ class TSPGeneratorTest(unittest.TestCase):
 
     def test_create_dataset(self):
         gen = TSPGenerator(self._num_points)
-        data, distances = gen.generate()
+        data = gen.generate()
 
         nose.tools.assert_equal(data.shape, (self._num_points, 2))
 
@@ -25,28 +24,24 @@ class TSPGeneratorTest(unittest.TestCase):
         D, p_value = stats.kstest(data[:, 1], 'uniform', args=(0, 10))
         nose.tools.assert_greater(p_value, 0.05)
 
-        # check the distance matrix
-        nose.tools.assert_equal(distances.shape, (self._num_points, self._num_points))
-        nose.tools.assert_true(np.all(np.diag(distances) == 0))
-
     def test_create_dataset_with_bounds(self):
         # check lower bound param
         gen = TSPGenerator(self._num_points, low=5)
-        data, distances = gen.generate()
+        data = gen.generate()
 
         nose.tools.assert_equal(data.shape, (self._num_points, 2))
         nose.tools.assert_equal(data[data < 5].size, 0)
 
         # check upper bound param
         gen = TSPGenerator(self._num_points, high=5)
-        data, distances = gen.generate()
+        data = gen.generate()
 
         nose.tools.assert_equal(data.shape, (self._num_points, 2))
         nose.tools.assert_equal(data[data > 5].size, 0)
 
         # check both bounds together
         gen = TSPGenerator(self._num_points, low=5, high=15)
-        data, distances = gen.generate()
+        data = gen.generate()
 
         nose.tools.assert_equal(data.shape, (self._num_points, 2))
         nose.tools.assert_equal(data[data < 5].size, 0)
