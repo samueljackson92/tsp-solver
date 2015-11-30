@@ -3,9 +3,9 @@ import nose.tools
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from ..tsp_generator import TSPGenerator
-from ..ga.population_generation import SimplePopulationGenerator
-from ..ga.selection import RouletteWheelSelection, TournamentSelection
+from tspsolver.tsp_generator import TSPGenerator
+from ..population_generation import SimplePopulationGenerator
+from ..selection import RouletteWheelSelection, TournamentSelection
 
 
 class RouletteWheelSelectionTest(unittest.TestCase):

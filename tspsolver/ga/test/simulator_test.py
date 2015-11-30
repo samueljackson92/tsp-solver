@@ -1,9 +1,8 @@
 import unittest
 import nose.tools
-import numpy as np
 
-from ..tsp_generator import TSPGenerator
-from ..ga.simulator import Simulator
+from tspsolver.tsp_generator import TSPGenerator
+from ..simulator import Simulator
 
 
 class SimulatorTest(unittest.TestCase):
