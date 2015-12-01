@@ -137,8 +137,8 @@ class TournamentSelection(AbstractSelectionOperator):
         :return: the chromosome that won the tournament.
         """
         idx = self._find_tournament_chromosomes()
-        winner_index = np.argmax(fitness[idx], axis=0)
-        return population[winner_index]
+        winner_index = np.argmin(fitness[idx], axis=0)
+        return population[idx[winner_index]]
 
     def _apply_selection(self, population):
         new_pop = np.array([self._run_tournament(population, self._fitness)

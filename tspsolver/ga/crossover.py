@@ -100,3 +100,42 @@ class TwoPointPMX(AbstractCrossoverOperator):
             child2[child2 == y[i]] = child2[i]
             child2[i] = y[i]
         return child1, child2
+
+
+class OrderCrossover(AbstractCrossoverOperator):
+        """Create a new population by keeping a subtour of the chromosome
+        and then copying from the other parent.
+        """
+
+        def _crossover_for_chromosomes(self, x, y):
+            # find subtours
+            pivot1 = np.random.randint(x.size/2)
+            pivot2 = np.random.randint(x.size/2, x.size)
+            subtour1 = x[pivot1:pivot2]
+            subtour2 = y[pivot1:pivot2]
+
+            # copy subtours to children
+            child1 = np.empty(x.size)
+            child1.fill(-1)  # fill with invalid number
+            child2 = np.empty(x.size)
+            child2.fill(-1)  # fill with invalid number
+            child1[pivot1:pivot2] = subtour1
+            child2[pivot1:pivot2] = subtour2
+
+            # replace missing parts from other chromosomes
+            subtour_size = subtour1.size
+            child1 = self._replace_from_parent(child1, y, pivot2, subtour_size)
+            child2 = self._replace_from_parent(child2, x, pivot2, subtour_size)
+            return child1, child2
+
+        def _replace_from_parent(self, child, parent, pos, tour_size):
+            for i in range(pos, pos + (parent.size-tour_size)):
+                index = i % parent.size
+                j = index
+                while parent[j] in child:
+                    j += 1
+                    j = j % parent.size
+
+                child[index] = parent[j]
+
+            return child
