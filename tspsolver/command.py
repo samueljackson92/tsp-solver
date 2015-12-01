@@ -8,7 +8,7 @@ import sys
 from tsp_generator import TSPGenerator
 from tuning import GeneticAlgorithmParameterEstimation
 from ga.simulator import Simulator
-from ga.plotting import plot_fitness, plot_solution
+from plotting import plot_fitness, plot_solution
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',
