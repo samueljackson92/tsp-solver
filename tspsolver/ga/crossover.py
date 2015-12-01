@@ -18,7 +18,7 @@ class AbstractCrossoverOperator(object):
 
         pop = []
         for x, y in zip(population[::2], np.roll(population, -1, axis=0)[::2]):
-            if self._pcross > np.random.random():
+            if np.random.random() < self._pcross:
                 c1, c2 = self._crossover_for_chromosomes(x, y)
                 pop.append(c1)
                 pop.append(c2)

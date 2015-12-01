@@ -3,9 +3,9 @@ import nose.tools
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from ..tsp_generator import TSPGenerator
-from ..ga.population_generation import SimplePopulationGenerator
-from ..ga.selection import RouletteWheelSelection, TournamentSelection
+from tspsolver.tsp_generator import TSPGenerator
+from ..population_generation import SimplePopulationGenerator
+from ..selection import RouletteWheelSelection, TournamentSelection
 
 
 class RouletteWheelSelectionTest(unittest.TestCase):
@@ -73,3 +73,14 @@ class TournamentSelectionTest(unittest.TestCase):
 
         exp_shape = (self._subset_size, self._num_points)
         nose.tools.assert_equal(subset.shape, exp_shape)
+
+    def test_run_tournament(self):
+        selector = TournamentSelection(self._subset_size)
+        population = np.array([[1, 2, 3, 4], [4, 3, 2, 1], [2, 3, 1, 4]])
+        fitness = np.array([[200], [100], [300]])
+
+        selector._tournament_size = 3
+        selector._population_size = 3
+        winner = selector._run_tournament(population, fitness)
+
+        np.testing.assert_array_equal([[4, 3, 2, 1]], winner)

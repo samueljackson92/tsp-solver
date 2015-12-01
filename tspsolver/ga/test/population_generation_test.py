@@ -3,8 +3,8 @@ import nose.tools
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from ..tsp_generator import TSPGenerator
-from ..ga.population_generation import SimplePopulationGenerator
+from tspsolver.tsp_generator import TSPGenerator
+from ..population_generation import SimplePopulationGenerator
 
 
 class SimplePopulationGeneratorTest(unittest.TestCase):

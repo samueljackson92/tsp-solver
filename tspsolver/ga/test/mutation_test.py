@@ -3,9 +3,11 @@ import nose.tools
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from ..tsp_generator import TSPGenerator
-from ..ga.population_generation import SimplePopulationGenerator
-from ..ga.mutation import SwapCityMutation, SwapAdjacentCityMutation, DisplacementMutation, InversionMutation, InsertionMutation
+from tspsolver.tsp_generator import TSPGenerator
+from ..population_generation import SimplePopulationGenerator
+from ..mutation import (SwapCityMutation, SwapAdjacentCityMutation,
+                        DisplacementMutation, InversionMutation,
+                        InsertionMutation)
 
 
 class SwapCityMutationTest(unittest.TestCase):

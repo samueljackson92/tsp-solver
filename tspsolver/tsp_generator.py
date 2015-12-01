@@ -3,7 +3,7 @@ import numpy as np
 
 class TSPGenerator:
     """
-    Create a new TSP dataset generator object.
+    Create a TSP dataset.
     """
 
     def __init__(self, num_points, low=0, high=10):
