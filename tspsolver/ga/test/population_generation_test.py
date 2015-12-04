@@ -19,7 +19,7 @@ class SimplePopulationGeneratorTest(unittest.TestCase):
 
     def test_generate_population(self):
         popGen = SimplePopulationGenerator(self._pop_size)
-        population = popGen.generate(self._distances.shape[0])
+        population = popGen.generate(self._data)
 
         nose.tools.assert_equal(population.shape, (self._pop_size, self._num_points))
         unique_pop = find_unique_rows(population)
@@ -38,12 +38,10 @@ class KNNPopulationGeneratorTest(unittest.TestCase):
 
     def test_generate_population(self):
         popGen = KNNPopulationGenerator(self._pop_size)
-        population = popGen.generate(self._data, self._distances.shape[0])
+        population = popGen.generate(self._data)
 
         nose.tools.assert_equal(population.shape, (self._pop_size, self._num_points))
-        unique_pop = find_unique_rows(population)
-        nose.tools.assert_equal(unique_pop.size, population.size)
-        assert False
+        nose.tools.assert_equal(self._pop_size, population.shape[0])
 
 
 def find_unique_rows(matrix):

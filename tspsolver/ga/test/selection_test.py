@@ -20,7 +20,7 @@ class RouletteWheelSelectionTest(unittest.TestCase):
         self._distances = distance_matrix(self._data, self._data)
 
         popGen = SimplePopulationGenerator(self._pop_size)
-        self._population = popGen.generate(self._distances.shape[0])
+        self._population = popGen.generate(self._data)
 
     def test_evaluate_simple_fitness(self):
         distances = np.array([[1., 1.41421356],
@@ -65,7 +65,7 @@ class TournamentSelectionTest(unittest.TestCase):
         self._distances = distance_matrix(self._data, self._data)
 
         popGen = SimplePopulationGenerator(self._pop_size)
-        self._population = popGen.generate(self._distances.shape[0])
+        self._population = popGen.generate(self._data)
 
     def test_selection(self):
         selector = TournamentSelection(self._subset_size)
