@@ -29,4 +29,4 @@ install:
 
 # Run test
 script:
-  - nosetests --with-cov --cov tsp_solver --cov-config .coveragerc --logging-level=INFO
+  - nosetests tsp_solver/ --logging-level=INFO
