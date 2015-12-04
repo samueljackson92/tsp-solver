@@ -526,7 +526,7 @@ Each of the component modules contains an abstract base class for the particular
 \end{figure}
 
 
-My implementation takes this slightly further in that the \textit{Simulator} class which composes the components of the GA together actually dynamically loads the correct components using Python's reflection capabilities according to user supplied string parameters. 
+My implementation takes this slightly further in that the \textit{Simulator} class which composes the components of the GA together actually dynamically loads the correct components using Python's reflection capabilities according to user supplied string parameters. The parameters for the application are supplied via a command line interface in the form of a JSON file. Information regarding the structure of the parameter file can be found in the appendix \ref{appendix:parameters}
 
 Once instantiated the \textit{Simulator} takes a 2D matrix with two columns ($x$ and $y$ coordinates) and $n$ rows (equal to the number of cities) as a parameter to the evolve method. The evolve method runs converts the datasets into a distance matrix then approximates a solution using the genetic algorithm.
 
@@ -548,8 +548,45 @@ While many different representations of the TSP are possible \cite{larranaga1999
 
 However, this does not mean that a path based representation is without its downsides. The primary issues with encoding a set of cities as a chromosome for a TSP is ensuring that the genetic operators used will produce valid tours. As mentioned in the preceding paragraphs, a valid tour needs to be a permutation of the enumeration of all cities in the dataset. It is easy to see how traditional naive genetic operators would inevitably create invalid tours by producing a solution that visits the same city twice and excludes one or more cities.
 
-\section{Genetic Operators Discussion}
+\section{Algorithm Components \& Genetic Operators Discussion}
+There are three main types of genetic operators that are typically used as part of a genetic algorithm. These are selection, crossover, and mutation. In my application I have implemented a variety of different genetic operators. Additionally I have used two different techniques for generating  of the initial populations. This section outlines the implementations I have used in the experiments in section \ref{sec:experiments} and provides a justification as to why they were chosen.
+
+\subsection{Population Generation}
+My genetic algorithm implementation has two different methods of initialising the population. The first type of population generation technique is purely random. The \textit{SimplePopulationGenerator} in the \textit{population\_generation} module simple create the desired population size by creating random permutations of the enumeration of the list of cities. 
+
+Random initialisation is very general and works fine for all genetic operators tested in my application. However, it is painfully evident that some initial solutions are going to better than others. In an optimal solution a city will have the city will the shortest distance from it next in the chromosome sequence. In general, over a small local neighbourhood, a good heuristic might be to use the closest neighbours to a city as the adjacent neighbours in the chromosome ordered from closest to largest. 
+
+This will not always yield great chromosome solutions. Contemplate the closest neighbours to a few points i \ref{fig:tsp-example} for a few moments and you will clearly see that the $k^{th}$ nearest element is not necessarily the $k{th}$ element in the optimal tour. However, especially for larger datasets, the cities in the immediate vicinity of one particular city are more likely to end up closer together in the chromosome.
+
+With this intuition I created a second population generator \textit{KNNPopulationGenerator} which uses the $K$-nearest neighbours of a city to generate a chromosome. Specifically the algorithm works as follows: for each element of the population to be created it picks a city at random. An ordered list of the $K$-nearest neighbours to that city are then found where $K$ is equal to the total number of cities. The hope is that this is more likely to lead to initial chromosomes which have some portion of their chromosomes already in the correct place (or nearly in the correct place) than simply choosing at random. 
+
+\subsection{Selection}
+In genetic algorithm terms, selection is the method by which individuals from the current population are in order to produce a new population through crossover and mutation. A good selection technique should yield more ``good'' chromosomes for reproduction than bad ones. This is because the best solutions in the current population are generally more likely to produce even better offspring in the following generation. 
+
+However, this does not mean that we should always just sort and take the best solutions because this rapidly leads to a lack of diversity. Consider a candidate TSP solution that yields a poor fitness because the just one of the connections geographically cuts from one side of the world to the other. In this scenario the fitness function ranks the solution as poor, but in reality it is quite close to being optimal! If a selection approach naively selects just the best looking solutions we are more likely to head towards local optima and potentially do not explore the full search space.
+
+In my application, I have implemented two classic yet contrasting types of selection operator. The first selection procedure I implemented was \textit{Roulette Wheel} selection \cite{colin2002genetic}. Roulette wheel selection uses a probability distribution over each potential solution to be picked. Solutions are weighted proportionally to their fitness. \textit{Roulette Wheel} selection selects chromosomes are random and proportionally to their weighting. \textit{Roulette Wheel} selection gets its name from the fact that individuals are weighted in proportion to the area of a sector of a roulette wheel \cite{colin2002genetic}.
+
+I chose to use \textit{Roulette Wheel} selection for two main reasons: firstly, it is very simple to implement and secondly, being one of the most basic techniques, it makes a nice yard stick which other techniques can be compared against. However, this approach has some well know downsides. \textit{Roulette Wheel} selection is well known to often be ``too random''. While candidate solutions are weighted such that more promising individuals are more likely to be picked there is still a huge amount of variation in which solutions actually get picked. This is especially true considering the shear number of solutions generated in even a moderately sized GA problem.
+
+Because of the limitations of \textit{Roulette Wheel} selection I chose to also implement \textit{Tournament} selection \cite{colin2002genetic}. In \textit{Tournament} selection a subset of the total population of chromosomes is chosen at random. The chromosomes in this random subset are then compared against each other. In my implementation I have decided to make the simplest choice an implement \textit{strict} \textit{Tournament} selection where the chromosome with the biggest fitness is always the ``winner'' of the tournament. An alternative formulation is the use of \textit{soft} tournaments where the winner is probabilistically selected according to their fitness.
+
+\textit{Tournament} selection is a very practical technique that is simple to implement, scales well, and can potentially be parallelised. Another key advantage over \textit{Roulette Wheel} selection is that \textit{Tournament} selection provides a parameter that directly adjusts the selection pressure applied by the selection operator. The selection pressure is the likelihood that an average individual will be selected over the fittest individual. Changing the size of the tournament influences how likely it is that weaker chromosomes will survive the selection process. Bigger tournaments lead to an increase chance of a better individual entering the tournament; therefore increasing the probability that they'll be selected and visa versa. However, it is also worth noting that \textit{Tournament} selection still suffers from the same issues as \textit{Roulette Wheel} selection. The random nature of the algorithm can mean that the distribution you get is skewed and not fully representative.
+
+\subsection{Crossover}
+The crossover operator is used to recombine selected individuals to form a new population with solutions that are different (and hopefully better) than the previous population. A good crossover operator should attempt to preserve the best portions of the selected chromosomes. Without the counter effect of a mutation operator a good crossover operator should eventually cause the GA to converge to a (possibly not optimal) solution.
+
+The implementations of the crossover operators that I have used in my application can be found in the \textit{crossover} module. I have implemented three different crossover operators, two of which are fairly similar to one another.
+
+The first two operators I have implemented are \textit{OnePointPMX} and \textit{TwoPointPMX}. As their name suggests the only different in their implementation is the number of pivot points used to define which parts of the chromosomes get recombined (similar to regular one and two point crossover). PMX crossover begins by copying some sub section of the parent chromosome to the child.
+
+
+
+\subsection{Mutation}
+
 \section{Experiments Performed}
+\label{sec:experiments}
+
 \section{Discussion and Analysis}
 \section{Conclusions and Future Work}
 
@@ -661,12 +698,16 @@ However, this does not mean that a path based representation is without its down
 
 
 \appendices
+
 \section{Installation of Program}
 \label{appendix:installation}
+
 \section{Command Line Interface}
 \label{appendix:cli}
 This appendix provides an overview of the operation of the CLI for the application.
 
+\section{Parameters}
+\label{appendix:parameters}
 %Some text for the appendix.
 
 % use section* for acknowledgement
