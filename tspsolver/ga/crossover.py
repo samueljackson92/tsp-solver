@@ -62,20 +62,36 @@ class OnePointPMX(AbstractCrossoverOperator):
     """
 
     def _crossover_for_chromosomes(self, x, y):
-        pivot = np.random.randint(x.size)
-        child1 = y.copy()
-        child2 = x.copy()
+        pivot = np.random.randint(0, x.size-1)
 
-        for i in xrange(pivot):
-            # set duplicate entry to be the one we're going to overwrite
-            child1[child1 == x[i]] = child1[i]
-            # crossover the gene
-            child1[i] = x[i]
+        # copy subtours to children
+        subtour1 = x[:pivot]
+        subtour2 = y[:pivot]
+        child1 = x.copy()
+        child2 = y.copy()
+        child1[:pivot] = subtour1
+        child2[:pivot] = subtour2
 
-            # set duplicate entry to be the one we're going to overwrite
-            child2[child2 == y[i]] = child2[i]
-            # crossover the gene
-            child2[i] = y[i]
+        # replace missing parts from other chromosomes
+        subtour_size = subtour1.size
+
+        # create partial mappings
+        child1_mapping = {}
+        child2_mapping = {}
+        for s1, s2 in zip(subtour1, subtour2):
+            child1_mapping[s1] = s2
+            child2_mapping[s2] = s1
+
+        # repare chromosomes using partial mappings
+        for i in range(pivot, pivot + (y.size-subtour_size)):
+            index = i % y.size
+            if child2[index] in child1_mapping.values():
+                child2[index] = child1_mapping[child2[index]]
+
+        for i in range(pivot, pivot + (x.size-subtour_size)):
+            index = i % x.size
+            if child1[index] in child2_mapping.values():
+                child1[index] = child2_mapping[child1[index]]
 
         return child1, child2
 
@@ -88,17 +104,36 @@ class TwoPointPMX(AbstractCrossoverOperator):
     def _crossover_for_chromosomes(self, x, y):
         pivot1 = np.random.randint(x.size/2)
         pivot2 = np.random.randint(x.size/2, x.size)
-        child1 = y.copy()
-        child2 = x.copy()
 
-        for i in xrange(pivot1, pivot2):
-            # set duplicate entry to be the one we're going to overwrite
-            child1[child1 == x[i]] = child1[i]
-            # crossover the gene
-            child1[i] = x[i]
+        # copy subtours to children
+        subtour1 = x[pivot1:pivot2]
+        subtour2 = y[pivot1:pivot2]
+        child1 = x.copy()
+        child2 = y.copy()
+        child1[pivot1:pivot2] = subtour1
+        child2[pivot1:pivot2] = subtour2
 
-            child2[child2 == y[i]] = child2[i]
-            child2[i] = y[i]
+        # replace missing parts from other chromosomes
+        subtour_size = subtour1.size
+
+        # create partial mappings
+        child1_mapping = {}
+        child2_mapping = {}
+        for s1, s2 in zip(subtour1, subtour2):
+            child1_mapping[s1] = s2
+            child2_mapping[s2] = s1
+
+        # repare chromosomes using partial mappings
+        for i in range(pivot2, pivot2 + (y.size-subtour_size)):
+            index = i % y.size
+            if child2[index] in child1_mapping.values():
+                child2[index] = child1_mapping[child2[index]]
+
+        for i in range(pivot2, pivot2 + (x.size-subtour_size)):
+            index = i % x.size
+            if child1[index] in child2_mapping.values():
+                child1[index] = child2_mapping[child1[index]]
+
         return child1, child2
 
 
@@ -124,6 +159,7 @@ class OrderCrossover(AbstractCrossoverOperator):
 
             # replace missing parts from other chromosomes
             subtour_size = subtour1.size
+
             child1 = self._replace_from_parent(child1, y, pivot2, subtour_size)
             child2 = self._replace_from_parent(child2, x, pivot2, subtour_size)
             return child1, child2

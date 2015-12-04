@@ -34,7 +34,7 @@ class Simulator():
         :rtype: 1Darray
         """
         dm = distance_matrix(data, data)
-        population = self.initilize_population(dm)
+        population = self.initilize_population(data)
 
         for i in xrange(self._num_epochs):
             population = self._apply_genetic_operations(population, dm)
@@ -146,7 +146,7 @@ class Simulator():
         """
         return self._min_fitness
 
-    def initilize_population(self, distance_matrix):
+    def initilize_population(self, data):
         """Initilize the first population to a random set fo solutions
 
         :param distance_matrix: distance matrix for points in the dataset
@@ -155,7 +155,7 @@ class Simulator():
         """
         logger.info("Beginning simulation...")
         self._start_time = time.time()
-        return self._generator.generate(distance_matrix.shape[0])
+        return self._generator.generate(data)
 
     def perform_selection(self, population, distance_matrix):
         """Apply the selection operator to a population
