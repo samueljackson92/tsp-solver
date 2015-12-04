@@ -1,3 +1,4 @@
+python-tk
 click
 scikit-learn
 matplotlib

@@ -578,7 +578,7 @@ The crossover operator is used to recombine selected individuals to form a new p
 
 The implementations of the crossover operators that I have used in my application can be found in the \textit{crossover} module. I have implemented three different crossover operators, two of which are fairly similar to one another.
 
-The first two operators I have implemented are \textit{OnePointPMX} and \textit{TwoPointPMX}. As their name suggests the only different in their implementation is the number of pivot points used to define which parts of the chromosomes get recombined (similar to regular one and two point crossover). PMX crossover begins by copying some sub section of the parent chromosome to the child.
+The first two operators I have implemented are \textit{OnePointPMX} and \textit{TwoPointPMX}. Both of these are variants of the \textit{partially mapped crossover}. As their names suggest the only different in their implementation is the number of pivot points used to define which parts of the chromosomes get recombined (similar to regular one and two point crossover). PMX crossover begins by copying some sub section of the parent chromosome to the child. This inevitably leads to an invalid tour because there will be duplicate cities in resulting solution. The PMX operator then repairs the new chromosomes using the mapping of the elements replaced by copying over the sub-tour. The algorithm proceeds by iterating over the parts of the chromosome outside of the copied sub-tour. If a duplicate element is found then it is replaced by inserting the corresponding element that was in original chromosome overwritten by copying the sub-tour using the mapping.
 
 
 
