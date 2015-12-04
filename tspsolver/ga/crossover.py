@@ -82,7 +82,7 @@ class OnePointPMX(AbstractCrossoverOperator):
             child1_mapping[s1] = s2
             child2_mapping[s2] = s1
 
-        # repare chromosomes using partial mappings
+        # repair chromosomes using partial mappings
         for i in range(pivot, pivot + (y.size-subtour_size)):
             index = i % y.size
             if child2[index] in child1_mapping.values():
@@ -123,7 +123,7 @@ class TwoPointPMX(AbstractCrossoverOperator):
             child1_mapping[s1] = s2
             child2_mapping[s2] = s1
 
-        # repare chromosomes using partial mappings
+        # repair chromosomes using partial mappings
         for i in range(pivot2, pivot2 + (y.size-subtour_size)):
             index = i % y.size
             if child2[index] in child1_mapping.values():
