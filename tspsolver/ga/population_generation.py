@@ -43,9 +43,8 @@ class KNNPopulationGenerator(AbstractPopulationGenerator):
         num_points = data.shape[0]
         knn = KDTree(data, leafsize=10)
         population = []
-        for _ in xrange(self._population_size):
-            index = np.random.randint(num_points)
-            d, chromosome = knn.query(data[index], k=num_points, distance_upper_bound=20)
+        for i in xrange(self._population_size):
+            d, chromosome = knn.query(data[i], k=num_points, distance_upper_bound=20)
             population.append(chromosome)
 
         return np.array(population)
