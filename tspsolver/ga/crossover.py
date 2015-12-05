@@ -5,8 +5,9 @@ from abc import ABCMeta, abstractmethod
 class AbstractCrossoverOperator(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, pcross=0.6):
+    def __init__(self, pcross=0.6, use_rog=False):
         self._pcross = pcross
+        self._use_rog = use_rog
 
     def crossover(self, population):
         """Peform crossover between pairs in a population
@@ -18,7 +19,11 @@ class AbstractCrossoverOperator(object):
 
         pop = []
         for x, y in zip(population[::2], np.roll(population, -1, axis=0)[::2]):
-            if np.random.random() < self._pcross:
+            if np.array_equal(x, y) and self._use_rog:
+                c1, c2 = self._rog_shuffle(x, y)
+                pop.append(c1)
+                pop.append(c2)
+            elif np.random.random() < self._pcross:
                 c1, c2 = self._crossover_for_chromosomes(x, y)
                 pop.append(c1)
                 pop.append(c2)
@@ -33,8 +38,8 @@ class AbstractCrossoverOperator(object):
 
         :param x: first parent to perform crossover on.
         :param y: second parent to perform crossover on.
-        :return: a new solution with generated from the parents.
-        :rtype: ndarray
+        :return: two new solutions with generated from the parents.
+        :rtype: tuple of arrays
         """
         pass
 
@@ -54,6 +59,25 @@ class AbstractCrossoverOperator(object):
             x_idx = np.random.randint(pop_size)
             y_idx = np.random.randint(pop_size)
             yield population[x_idx], population[y_idx]
+
+    def _rog_shuffle(self, x, y):
+        """Make Randomly Generated Offspring.
+
+        This is applied in the case that both parents are identical, suggesting
+        that their is a lack of diversity in the population. Instead of combining
+        to give identical children (clones), we randomly shuffle the parents
+        to reintroduce diversity.
+
+        :param x: first parent to perform crossover on.
+        :param y: second parent to perform crossover on.
+        :return: two new solutions with generated from the parents.
+        :rtype: tuple of arrays
+        """
+        c1 = x.copy()
+        c2 = y.copy()
+        np.random.shuffle(c1)
+        np.random.shuffle(c2)
+        return c1, c2
 
 
 class OnePointPMX(AbstractCrossoverOperator):
