@@ -30,7 +30,6 @@ class AbstractCrossoverOperator(object):
             else:
                 pop.append(x)
                 pop.append(y)
-            print pop
         return np.array(pop)
 
     @abstractmethod
