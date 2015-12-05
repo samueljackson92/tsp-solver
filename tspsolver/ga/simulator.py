@@ -39,10 +39,11 @@ class Simulator():
         for i in xrange(self._num_epochs):
             population = self._apply_genetic_operations(population, dm)
             self._cache_epoch_performance(population)
+            self._set_best_solution(population)
             self._log_progress(i)
 
         self._log_final_output()
-        return self._find_best_solution(population)
+        return self._best_ever_solution
 
     def _cache_epoch_performance(self, population):
         """Store the min, max, and average of each generation
@@ -65,16 +66,16 @@ class Simulator():
         if iteration % 100 == 0:
             logger.info("------------------------------------------------")
             logger.info("Iteration %d" % iteration)
-            logger.info("Current best solution: %d" % self._min_fitness[-1])
-            logger.info("Best ever solution:    %d" % np.min(self._min_fitness))
+            logger.info("Current best solution fitness: %d" % self._min_fitness[-1])
+            logger.info("Best ever solution fitness:    %d" % np.min(self._min_fitness))
 
     def _log_final_output(self):
         """Log a final output message on completion"""
         total_time = (time.time() - self._start_time)
         logger.info("------------------------------------------------")
         logger.info("FINISHED!")
-        logger.info("Current best solution: %d" % self._min_fitness[-1])
-        logger.info("Best ever solution:    %d" % np.min(self._min_fitness))
+        logger.info("Current best solution fitness: %d" % self._min_fitness[-1])
+        logger.info("Best ever solution fitness:    %d" % np.min(self._min_fitness))
         logger.info("Execution Time:        %.2fs" % total_time)
 
     def _apply_genetic_operations(self, population, distance_matrix):
@@ -121,6 +122,16 @@ class Simulator():
         """
         fitness = self._selector.get_fitness()
         return population[np.argmin(fitness)]
+
+    def _set_best_solution(self, population):
+        """Set the best solution if the current generation yielded one
+        better than the last generation
+
+        :param population: a 2Darray representing a population
+        """
+        best_solution = self._find_best_solution(population)
+        if self._min_fitness[-1] <= np.min(self._min_fitness):
+            self._best_ever_solution = best_solution
 
     def get_averge_fitness(self):
         """Get the averge fitness of over all iterations
