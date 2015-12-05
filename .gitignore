@@ -62,3 +62,4 @@ man/
 # Ignore config files for project
 *.txt
 *.json
+*.csv

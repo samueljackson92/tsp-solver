@@ -3,6 +3,7 @@ from sklearn.grid_search import ParameterGrid
 
 from ga.simulator import Simulator
 from tsp_generator import TSPGenerator
+import pandas as pd
 
 
 class GeneticAlgorithmParameterEstimation():
@@ -39,6 +40,8 @@ class GeneticAlgorithmParameterEstimation():
         self._param_fitness = []
         datasets = [self._generator.generate() for _ in range(self._num_datasets)]
 
+        param_data = pd.DataFrame.from_dict(param_grid)
+
         for setting in param_grid:
             mean_fitness = 0
             for dataset in datasets:
@@ -48,7 +51,8 @@ class GeneticAlgorithmParameterEstimation():
             mean_fitness = float(mean_fitness) / self._num_datasets
             self._param_fitness.append(mean_fitness)
 
-        return param_grid[np.argmin(self._param_fitness)]
+        param_data['fitness'] = self._param_fitness
+        return param_data
 
     def get_best_fitness(self):
         """ Get the average measure of fitness achieved over the datasets

@@ -97,14 +97,18 @@ def solve(parameter_file, dataset_file, num_points):
 
 @cli.command()
 @click.argument("parameter-file")
-@click.argument("output-file")
+@click.argument("results-file")
+@click.argument("best-parameter-file")
 @click.option('--num-points', '-n', default=10,
               help="Number of points to generate.")
 @click.option('--num-datasets', '-d', default=3,
               help="Number of points to generate.")
-def tune(parameter_file, output_file, num_points, num_datasets):
+def tune(parameter_file, results_file, best_parameter_file, num_points, num_datasets):
     params = load_parameter_file(parameter_file)
     tuner = GeneticAlgorithmParameterEstimation(num_datasets=num_datasets,
                                                 dataset_size=num_points)
-    best_params = tuner.perform_grid_search(params)
-    save_parameter_file(output_file, best_params)
+    results = tuner.perform_grid_search(params)
+    best_params = results.ix[results['fitness'].idxmax()]
+
+    results.to_csv(results_file)
+    save_parameter_file(best_parameter_file, best_params.to_dict())
