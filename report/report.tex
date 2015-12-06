@@ -664,10 +664,11 @@ Finally, the \textit{InsertionMutation} is an alternative operator which operate
 
 \section{Experiments Performed}
 \label{sec:experiments}
-This section explains the experiments carried out using the aforementioned system and components described in the preceding sections.
+This section explains the experiments carried out using the aforementioned system and components described in the preceding sections. For all experiments in this section of the document, unless otherwise noted, the following setup is used: In order to fairly compare the operators a parameter grid is generated for each type of operator. Each set of parameters is tested on a total of $5$ different randomly generated datasets each with $50$ cities. This number was chosen to be high enough to show the differences between parameters and operators, but low enough to make computation time realistic. All parameter sets are tested on the same random datasets to ensure consistency. The median fitness value is taken to represent the test as a whole. This is to ensure that the outcome of the test was not just random chance or affected by a single outlier. 
 
 \subsection{Crossover and Mutation operators}
-The first experiment examines which of the crossover and mutation operators work best together. In order to fairly compare the operators a parameter grid is generated for each type of operator. Each set of parameters is tested on a total of $5$ different randomly generated datasets. All parameter sets are tested on the same random datasets to ensure consistency. The median fitness value is taken to represent the test as a whole. This is to ensure that the outcome of the test was not just random chance or affected by a single outlier. Table \ref{table:cross-vs-mutate} shows the results of comparing the crossover operators against mutation operators.
+\label{subsec:cross-vs-mutate-operators}
+The first experiment examines which of the crossover and mutation operators work best together. Table \ref{table:cross-vs-mutate} shows the summary results of comparing the crossover operators against mutation operators. Figure \ref{fig:cross-vs-mutate} shows the fitness of each operator combination over a number of $1000$ epochs for a single trial.
 
 \begin{figure}[H]
 \centering
@@ -678,7 +679,7 @@ The first experiment examines which of the crossover and mutation operators work
 
 \subsection{Crossover and Mutation Parameters}
 \label{subsec:crossover-mutation-parameters}
-Motivated by the results of this experiment and constrained by the limits of this report and the time complexity of calculating many runs on multiple parameters sets the findings for the remaining experiments in the following sections will use a \textit{OrderCrossover} with \textit{InversionMutation} with mutation and crossover parameters selected using a grid search as described above over a small range of sensible parameter choices.
+Motivated by the results of this experiment and constrained by the size limits of this report and the time complexity of calculating many runs on multiple parameters sets the findings for the remaining experiments will use \textit{OrderCrossover} with \textit{InversionMutation} with mutation and crossover parameters selected using a grid search as described above over a small range of sensible parameter choices.
 
 This section presents the results of searching for those parameters over a range of possible values. Table \ref{table:cross-vs-mutate-params} shows the results of running a grid search over a small range of possible values for the probability of crossover and mutation. The general trend in towards a larger crossover and mutation rate.
 
@@ -705,6 +706,7 @@ This section presents the results of searching for those parameters over a range
 \end{figure}
 
 \subsection{Selection Operators}
+\label{subsec:selection-parameters}
 This section looks at the effect of modifying the selection parameters for both \textit{TournamentSelection} and \textit{RouletteWheelSelection}. Once again this has been limited to just using \textit{OrderCrossover} and \textit{InversionMutation}. The crossover and mutation rates for each run are fixed to $0.9$ and $0.2$ based on the results of prior testing in the previous section. The method used in this section is the same as the previous sections. $50$ data points are used for each run. Sadly \textit{RouletteWheelSelection} failed to converge in all trials. Table \ref{table:selection-vs-pop-size} shows the results for the trails on population size versus tournament size for \textit{TournamentSelection}. Table \ref{table:selection-vs-pop-size2} shows the results of different population sizes for \textit{RouletteWheelSelection}. Figure \ref{fig:tournament-selection-convergence} shows a single trial run with varying population sizes and tournament sizes.
 
 \begin{figure}[H]
@@ -714,14 +716,52 @@ This section looks at the effect of modifying the selection parameters for both 
 \label{fig:tournament-selection-convergence}
 \end{figure}
 
+\begin{table*}[t]
+\centering
+\input{tables/elite_fitness.tex}
+\caption{This shows a trial run on three different settings for the elites parameter. This run uses a similar setup to the proceeding section, but uses tournament size of $10$ and population size of $40$. This suggests that maintaining one elite chromosome between populations produces the best results.}
+\label{table:elite-fitness}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\input{tables/knn_fitness.tex}
+\caption{The fitness for a batch of $5$ datasets each containing $100$ cities.}
+\label{table:knn-fitness}
+\end{table*}
+
 \subsection{Elitism}
 This section shows the effects of adding elitism to the genetic algorithm. Elitism allows all algorithm to copy $x$ number of chromosomes unaltered from one generation to another. This ensures that the algorithm doesn't accidentally ``forget'' the its best result.
 
-\subsection{Population Initialisation}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/elite_convergence.png}
+\caption{Shows the convergence of one run for each setting of the elite parameter. Again, like other trials this used $50$ cities.}
+\label{fig:elite-convergence}
+\end{figure}
+
+\subsection{Population Initialisation}
+This section shows the effects of using different population initialisation strategies. Table \ref{table:knn-fitness} shows the effect of running the same experimental setup with different population generators. For the \textit{KNNPopulationGenerator} a parameter specifies the proportion of the chromosomes that are generated by taking the KNN neighbours. Figure \ref{fig:knn-convergence} shows the convergence of one trial for each parameter set. In both cases datasets containing $100$ cities were used. This is so that the difference can be clearly seen. The setup for these trials used the same parameters as section \ref{subsec:selection-parameters} but also include a single elite chromosome in each generation.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/knn_convergence.png}
+\caption{Shows the convergence of the different settings for population generation for one trail over a dataset of $100$ cities. It can be clearly seen that the KNN approach leads to faster convergence.}
+\label{fig:knn-convergence}
+\end{figure}
 
 
 \section{Discussion and Analysis}
+Section \ref{subsec:cross-vs-mutate-operators} compared the differences between a variety of different crossover and mutation operators. In these experiments \textit{OrderCrossover} was consistently the best crossover operator out of the three. This matches my expectations because order crossover is designed to better preserve the order of chromosome elements. This is obviously very important in problems such as the TSP where the order is perhaps the most import part of the solution rather than just the producing valid tours. I would suggest that order based crossover better encodes heuristics about the problem domain than PMX.
+
+Comparing the mutation operators shows that \textit{InversionMutation} appears to produce the best results and \textit{SwapCity} mutation produces the worst. This seems to be a reasonable result. Logically the \textit{SwapCity} mutation should be more destructive than the displacement and inversion operations which both keep whole portions of the chromosome in order. As order is the most important aspect of the TSP these mutations must be able to push the GA to explore the search space effectively without being overly destructive, hence the better results. It's also worth noting that the insertion mutation achieves results that are very similar to the displacement mutation and much better than just swapping cities. I found this to be slightly unexpected. It could just be that this operator performed better because it's slightly less destructive to the order or it could just be a statistical fluke.
+
+In terms of the probability of crossover and mutation parameters used results in section \ref{subsec:crossover-mutation-parameters} clearly show a tendency to prefer larger crossover and mutation rates. Looking at table \ref{table:cross-vs-mutate-params} it can be clearly seen that the results definitively become better towards the bottom right. What is also interesting in this result is that the effect of changing the mutation parameter has a larger effect on the results of the experiment than the probability of crossover. Comparing this with figure \ref{fig:cross-vs-mutate-params} shows that increasing the mutation rate increases the chance of the genetic algorithm finding a better solution. The effect of the crossover rate appears to be a little more subtle. Looking closely at figure \ref{fig:cross-vs-mutate-params} shows having a very high crossover rate ($0.9$) causes the GA to plateau earlier. I.e. a high crossover rate causes the GA to converge faster but not necessarily to the best solution. However, when combined with a hight mutation rate, it can be seen that the convergence rate becomes more consistent, although not identical.
+
+The results of testing the selection operator show some interesting insights. Unfortunately here roulette wheel selection failed to converge in any tests. I believe this is down to the fact that the GA becomes ``too random''. In contrast to tournament selection, roulette wheel selection is less likely to draw a consistent distribution of chromosomes. Therefore while it may find a good solution, there's less of a guarantee that the solution will make it to the next generation than with tournament selection. This combined with the destructive effects of mutation most likely combine to make convergence difficult. I ran some additional trials (not included) with a much lower mutation rate ($0.01$) and larger population size ($50$) in order to encourage a better result with no success.
+
 \section{Conclusions and Future Work}
 
 
@@ -832,125 +872,132 @@ This section shows the effects of adding elitism to the genetic algorithm. Eliti
 
 
 \appendices
+\clearpage
 
-\section{Installation of Program}
-\label{appendix:installation}
-Installation is easiest using the \textit{pip} package manager. Python version $2.7.9+$ automatically ship with \textit{pip}. If you're using an older version of Python you can find the installation instructions at http://pip.readthedocs.org/en/stable/installing/.
-
-To install the program locally \textit{cd} into the top level directory of the project and run the following:
-
-\begin{lstlisting}[language=Bash]
-pip install -e .	
-\end{lstlisting}
-
-
-All of the project dependancies should be installed automatically. If for some reason they are not, the full list of dependancies are:
-
-\begin{itemize}
-	\item numpy
-	\item scipy
-	\item pandas
-	\item scikit-learn
-	\item matplotlib
-	\item click
-\end{itemize}
-
-\section{Command Line Interface}
-\label{appendix:cli}
-There are three major commands: \textit{generate}, \textit{solve} and \textit{tune}. 
-
-\subsection{Generating Datasets}
-The generate command will create a uniformly random TSP dataset and output it to the specified CSV file.
-
-\begin{lstlisting}[language=Bash]
-tspsolver generate dataset.csv	
-\end{lstlisting}
-
-Optionally, it can also take a parameter specifying the number of cities to generate (default is 10):
-
-\begin{lstlisting}[language=Bash]
-tspsovler generate -n 30 dataset.csv	
-\end{lstlisting}
-
-
-\subsection{Solving TSP problems}
-The ```solve``` command can be used to run the genetic algorithm and produce solutions to the problems. The command takes a JSON parameter file as an argument. Optionally you can provide a dataset file (such as produced by the ```generate``` command) or specify a random number of cities to generate. When the command terminates, two plots are produced. One shows the min, mean, and max fitness across all generations, the second shows the best solution found over all datasets.
-
-Example Parameter File:
-\begin{lstlisting}
-{
-    "num_epochs": 1000,
-    "num_elites": 2,
-    "generator": "SimplePopulationGenerator",
-    "generator_population_size": 20,
-    "selector": "RouletteWheelSelection",
-    "selector_tournament_size": 5,
-    "crossover": "OrderCrossover",
-    "crossover_pcross": 0.9,
-    "mutator": "InversionMutation",
-    "mutator_pmutate": 0.1
-}
-\end{lstlisting}
-
-Solving a TSP problem with a randomly generated TSP dataset:
-
-\begin{lstlisting}[language=Bash]
-tspsolver solve -n 20  params.json
-\end{lstlisting}
-
-Solving a TSP problem with an exisitng dataset:
-\begin{lstlisting}[language=Bash]
-tspsolver solve -f dataset.csv params.json
-\end{lstlisting}
-
-\subsection{Tuning Parameters}
-The final command can be used to run a range of parameter configurations over a number of different datasets. This can be useful to examine the effects of different parameter datasets. Each configuration is run on ```n``` different randomly generated datasets and the median result is take to represent the whole. The results for all datasets are saved to a CSV file. The configuration that produced the best results is also saved to a JSON file.
-
-This command takes a special parameter file that specifies ranges of parameters. An example is shown below:
-
-\begin{lstlisting}
-{
-    "num_epochs": [1000],
-    "num_elites": [0],
-    "generator": ["SimplePopulationGenerator"],
-    "generator_population_size": [20],
-    "selector": ["TournamentSelection"],
-    "selector_tournament_size": [5],
-    "crossover": ["OrderCrossover"],
-    "crossover_pcross": [0.6, 0.7, 0.8, 0.9],
-    "mutator": ["InversionMutation"],
-    "mutator_pmutate": [0.01, 0.05, 0.1, 0.2]
-}
-\end{lstlisting}
-
-This will run the genetic algorithm with a varying range of crossover and mutation probabilities. An example of running the tuning command is as follows:
-
-\begin{lstlisting}[language=Bash]
-tspsolver tune -d 5 -n 50 tuning_params.json results.csv best.json
-\end{lstlisting}
-
-In the above command the \textit{-d} command specifies the number of datasets to generate for each parameter configuration. The \textit{-n} flag specifies the number of random generated points to use for each dataset. \textit{tuning\_params.json} is the special parameter file with ranges. \textit{results.csv} is the CSV file created with all parameter results. \textit{best.json} is the generated parameter file containing the parameters that produced the best run.
-
-\section{Parameters}
-\label{appendix:parameters}
-This appendix provides an overview of the different parameters that can be used with the system with example values and a description of what the parameter controls.
-
-
-\begin{table}
-    \begin{tabular}{l | l | p{11cm} }
-    Parameter                   & Example Value              & Description                                                                                                                               \\ \hline
-    num\_epochs                 & 1000                       & The number of epochs to run the genetic algorithm for.                                                                                    \\ 
-    num\_elites                 & 2                          & The number of elites to carry over the the next generation.                                                                               \\
-    generator                   & SimplePopulationGeneration & The type of generator to use to initialise the population. This can either be \textit{SimplePopulationGeneration} or \textit{KNNPopulationGenerator}.       \\
-    generator\_population\_size & 20                         & Specifies the population size of the genetic algorithm                                                                                    \\
-    selector                    & TournamentSelection        & Specifies which type of selection to use. This can either be \textit{TournamentSelection} or \textit{RouletteWheelSelection}                                \\
-    selector\_tournament\_size  & 5                          & When using tournament selection this controls the size of the tournament used.                                                            \\
-    crossover                   & OrderCrossover             & Specifies the crossover operator to use. This can be one of: \textit{OrderCrossover}, \textit{OnePointPMX}, or \textit{TwoPointPMX}.                                 \\
-    crossover\_pcross           & 0.9                        & This controls the probability that crossover will occur.  Must be in the range $0 \leq x \leq 1$                                                \\
-    mutator                     & InversionMutation          & Specifies the mutation operator to use. This can be one of: \textit{SwapCityMutation}, \textit{InversionMutation}, \textit{InsertionMutation}, \textit{DisplacementMutation}. \\
-    mutator\_pmutate            & 0.1                        & This controls the probability that mutation will occur. Must be in the range $0 \leq x \leq 1$                                                  \\
-    \end{tabular}
-\end{table}
+%\section{Installation of Program}
+%\label{appendix:installation}
+%Installation is easiest using the \textit{pip} package manager. Python version $2.7.9+$ automatically ship with \textit{pip}. If you're using an older version of Python you can find the installation instructions at http://pip.readthedocs.org/en/stable/installing/.
+%
+%To install the program locally \textit{cd} into the top level directory of the project and run the following:
+%
+%\begin{lstlisting}[language=Bash]
+%pip install -e .	
+%\end{lstlisting}
+%
+%
+%All of the project dependancies should be installed automatically. If for some reason they are not, the full list of dependancies are:
+%
+%\begin{itemize}
+%	\item numpy
+%	\item scipy
+%	\item pandas
+%	\item scikit-learn
+%	\item matplotlib
+%	\item click
+%\end{itemize}
+%
+%\section{Command Line Interface}
+%\label{appendix:cli}
+%There are three major commands: \textit{generate}, \textit{solve} and \textit{tune}. 
+%
+%\subsection{Generating Datasets}
+%The generate command will create a uniformly random TSP dataset and output it to the specified CSV file.
+%
+%\begin{lstlisting}[language=Bash]
+%tspsolver generate dataset.csv	
+%\end{lstlisting}
+%
+%Optionally, it can also take a parameter specifying the number of cities to generate (default is 10):
+%
+%\begin{lstlisting}[language=Bash]
+%tspsovler generate -n 30 dataset.csv	
+%\end{lstlisting}
+%
+%
+%\subsection{Solving TSP problems}
+%The ```solve``` command can be used to run the genetic algorithm and produce solutions to the problems. The command takes a JSON parameter file as an argument. Optionally you can provide a dataset file (such as produced by the ```generate``` command) or specify a random number of cities to generate. When the command terminates, two plots are produced. One shows the min, mean, and max fitness across all generations, the second shows the best solution found over all datasets.
+%
+%Example Parameter File:
+%\begin{lstlisting}
+%{
+%    "num_epochs": 1000,
+%    "num_elites": 2,
+%    "generator": "SimplePopulationGenerator",
+%    "generator_population_size": 20,
+%    "selector": "RouletteWheelSelection",
+%    "selector_tournament_size": 5,
+%    "crossover": "OrderCrossover",
+%    "crossover_pcross": 0.9,
+%    "mutator": "InversionMutation",
+%    "mutator_pmutate": 0.1
+%}
+%\end{lstlisting}
+%
+%Solving a TSP problem with a randomly generated TSP dataset:
+%
+%\begin{lstlisting}[language=Bash]
+%tspsolver solve -n 20  params.json
+%\end{lstlisting}
+%
+%Solving a TSP problem with an exisitng dataset:
+%\begin{lstlisting}[language=Bash]
+%tspsolver solve -f dataset.csv params.json
+%\end{lstlisting}
+%
+%\subsection{Tuning Parameters}
+%The final command can be used to run a range of parameter configurations over a number of different datasets. This can be useful to examine the effects of different parameter datasets. Each configuration is run on ```n``` different randomly generated datasets and the median result is take to represent the whole. The results for all datasets are saved to a CSV file. The configuration that produced the best results is also saved to a JSON file.
+%
+%This command takes a special parameter file that specifies ranges of parameters. An example is shown below:
+%
+%\begin{lstlisting}
+%{
+%    "num_epochs": [1000],
+%    "num_elites": [0],
+%    "generator": ["SimplePopulationGenerator"],
+%    "generator_population_size": [20],
+%    "selector": ["TournamentSelection"],
+%    "selector_tournament_size": [5],
+%    "crossover": ["OrderCrossover"],
+%    "crossover_pcross": [0.6, 0.7, 0.8, 0.9],
+%    "mutator": ["InversionMutation"],
+%    "mutator_pmutate": [0.01, 0.05, 0.1, 0.2]
+%}
+%\end{lstlisting}
+%
+%This will run the genetic algorithm with a varying range of crossover and mutation probabilities. An example of running the tuning command is as follows:
+%
+%\begin{lstlisting}[language=Bash]
+%tspsolver tune -d 5 -n 50 tuning_params.json results.csv best.json
+%\end{lstlisting}
+%
+%In the above command the \textit{-d} command specifies the number of datasets to generate for each parameter configuration. The \textit{-n} flag specifies the number of random generated points to use for each dataset. \textit{tuning\_params.json} is the special parameter file with ranges. \textit{results.csv} is the CSV file created with all parameter results. \textit{best.json} is the generated parameter file containing the parameters that produced the best run.
+%
+%\clearpage
+%\onecolumn
+%\section{Parameters}
+%\label{appendix:parameters}
+%This appendix provides an overview of the different parameters that can be used with the system with example values and a description of what the parameter controls.
+%
+%
+%\begin{table}[ht]
+%    \begin{tabular}{l | l | p{11cm} }
+%    Parameter                   & Example Value              & Description                                                                                                                               \\ \hline
+%    num\_epochs                 & 1000                       & The number of epochs to run the genetic algorithm for.                                                                                    \\ 
+%    num\_elites                 & 2                          & The number of elites to carry over the the next generation.                                                                               \\
+%    generator                   & SimplePopulationGeneration & The type of generator to use to initialise the population. This can either be \textit{SimplePopulationGeneration} or \textit{KNNPopulationGenerator}.       \\
+%    generator\_population\_size & 20                         & Specifies the population size of the genetic algorithm                                                                                    \\
+%    generator\_random\_proportion & 0.5						 & When using KNN population generation this controls the ratio of individuals selected using KNN relative to the number of random chromosomes. Must be in the range $0 \leq x \leq 1$ \\ 
+%    selector                    & TournamentSelection        & Specifies which type of selection to use. This can either be \textit{TournamentSelection} or \textit{RouletteWheelSelection}                                \\
+%    selector\_tournament\_size  & 5                          & When using tournament selection this controls the size of the tournament used.                                                            \\
+%    crossover                   & OrderCrossover             & Specifies the crossover operator to use. This can be one of: \textit{OrderCrossover}, \textit{OnePointPMX}, or \textit{TwoPointPMX}.                                 \\
+%    crossover\_pcross           & 0.9                        & This controls the probability that crossover will occur.  Must be in the range $0 \leq x \leq 1$                                                \\
+%    mutator                     & InversionMutation          & Specifies the mutation operator to use. This can be one of: \textit{SwapCityMutation}, \textit{InversionMutation}, \textit{InsertionMutation}, \textit{DisplacementMutation}. \\
+%    mutator\_pmutate            & 0.1                        & This controls the probability that mutation will occur. Must be in the range $0 \leq x \leq 1$                                                  \\
+%    \end{tabular}
+%\end{table}
+%
+%\clearpage
+%\twocolumn
 
 %Some text for the appendix.
 
