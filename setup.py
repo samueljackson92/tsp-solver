@@ -15,6 +15,9 @@ config = {
     'install_requires': [
         'numpy',
         'scipy',
+        'pandas',
+        'scikit-learn',
+        'matplotlib',
         'Click'
     ],
     'entry_points': '''

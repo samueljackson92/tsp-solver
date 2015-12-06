@@ -43,13 +43,13 @@ class GeneticAlgorithmParameterEstimation():
         param_data = pd.DataFrame.from_dict(param_grid)
 
         for setting in param_grid:
-            mean_fitness = 0
+            param_fitness = []
             for dataset in datasets:
                 fitness = Simulator(**setting).score(dataset)
-                mean_fitness += fitness
+                param_fitness.append(fitness)
 
-            mean_fitness = float(mean_fitness) / self._num_datasets
-            self._param_fitness.append(mean_fitness)
+            median_fitness = np.median(param_fitness)# mean_fitness = float(mean_fitness) / self._num_datasets
+            self._param_fitness.append(median_fitness)
 
         param_data['fitness'] = self._param_fitness
         return param_data

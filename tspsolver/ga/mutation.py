@@ -46,23 +46,6 @@ class SwapCityMutation(AbstractMutationOperator):
         return chromosome
 
 
-class SwapAdjacentCityMutation(AbstractMutationOperator):
-    """Mutate indivudals in a population by randomly swapping two genes.
-    """
-
-    def _perform_mutation(self, chromosome):
-        """Randomly swap two genes
-
-        :param chromosome: 1D array representing a chromosome to mutate
-        :return: 1D array representing the modified chromosome
-        :rtype: ndarray
-        """
-        a = np.random.randint(chromosome.size)
-        b = (a+1) % chromosome.size
-        chromosome[a], chromosome[b] = chromosome[b], chromosome[a]
-        return chromosome
-
-
 class DisplacementMutation(AbstractMutationOperator):
     """Mutate indivudals in a population by randomly moving a subtour in the
     chromosome.

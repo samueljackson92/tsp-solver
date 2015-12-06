@@ -108,7 +108,7 @@ def tune(parameter_file, results_file, best_parameter_file, num_points, num_data
     tuner = GeneticAlgorithmParameterEstimation(num_datasets=num_datasets,
                                                 dataset_size=num_points)
     results = tuner.perform_grid_search(params)
-    best_params = results.ix[results['fitness'].idxmax()]
+    best_params = results.ix[results['fitness'].idxmin()]
 
     results.to_csv(results_file)
     save_parameter_file(best_parameter_file, best_params.to_dict())

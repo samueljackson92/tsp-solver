@@ -5,12 +5,11 @@ from abc import ABCMeta, abstractmethod
 class AbstractSelectionOperator(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, subset_size, **kwargs):
+    def __init__(self, **kwargs):
         """Create a new selection technique.
 
-        :param subset_size: the size of the subset of the population to use.
         """
-        self._subset_size = subset_size
+        pass
 
     def selection(self, population, distance_matrix):
         """ Choose a subset of a population to breed from.
@@ -102,7 +101,7 @@ class RouletteWheelSelection(AbstractSelectionOperator):
         """
         pop_size = population.shape[0]
         indicies = np.arange(pop_size)
-        idx = np.random.choice(indicies, size=self._subset_size, p=fit_prob)
+        idx = np.random.choice(indicies, size=self._population_size, p=fit_prob, replace=True)
         return population[idx]
 
     def _apply_selection(self, population):
@@ -142,5 +141,5 @@ class TournamentSelection(AbstractSelectionOperator):
 
     def _apply_selection(self, population):
         new_pop = np.array([self._run_tournament(population, self._fitness)
-                            for i in xrange(self._subset_size)])
+                            for i in xrange(self._population_size)])
         return new_pop
