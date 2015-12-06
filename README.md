@@ -65,3 +65,31 @@ Solving a TSP problem with an exisitng dataset:
 ```bash
 tspsolver solve -f dataset.csv params.json
 ```
+
+### Tuning Parameters
+The final command can be used to run a range of parameter configurations over a number of different datasets. This can be useful to examine the effects of different parameter datasets. Each configuration is run on ```n``` different randomly generated datasets and the median result is take to represent the whoel. The results for all datasets are saved to a CSV file. The configuration that produced the best results is also saved to a JSON file.
+
+This command takes a special parameter file that specifies ranges of parameters. An example is shown below:
+
+```json
+{
+    "num_epochs": [1000],
+    "num_elites": [0],
+    "generator": ["SimplePopulationGenerator"],
+    "generator_population_size": [20],
+    "selector": ["TournamentSelection"],
+    "selector_tournament_size": [5],
+    "crossover": ["OrderCrossover"],
+    "crossover_pcross": [0.6, 0.7, 0.8, 0.9],
+    "mutator": ["InversionMutation"],
+    "mutator_pmutate": [0.01, 0.05, 0.1, 0.2]
+}
+```
+
+This will run the genetic algorithm with a varying range of crossover and mutation probabilities. An example of running the tuning command is as follows:
+
+```bash
+tspsolver tune -d 5 -n 50 tuning_params.json results.csv best.json
+```
+
+In the above command the ```-d``` command specifies the number of datasets to generate for each parameter configuration. The ```-n``` flag specifies the number of random generated points to use for each dataset. ```tuning_params.json``` is the special parameter file with ranges. ```results.csv``` is the csv file created with all parameter results. ```best.json``` is the generated parameter file containing the parameters that produced the best run.
