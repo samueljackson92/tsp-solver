@@ -49,7 +49,6 @@ Example Parameter File:
     "selector_tournament_size": 5,
     "crossover": "OrderCrossover",
     "crossover_pcross": 0.9,
-    "crossover_use_rog": false,
     "mutator": "InversionMutation",
     "mutator_pmutate": 0.1
 }
