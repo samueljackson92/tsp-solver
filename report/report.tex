@@ -530,107 +530,107 @@
 \section{Introduction}
 
 \noindent 
-A genetic algorithm (GA) is a search and optimisation method frequently used to find approximate solutions in challenging problem domains. Genetic algorithms are inspired by the biological concept of natural selection. This places genetic algorithms under the category of biologically inspired approaches to optimisation; along with genetic programming, ant colony optimisation, and particle swarm optimisation. Many traditional optimisation techniques rely on the calculation of derivatives and often requires good knowledge of the search space. GAs on the other hand only require a measure of solution quality, making them well suited to difficult optimisation problems where traditional techniques would otherwise fail.
-In a genetic algorithm solutions to a problem are encoded as “chromosomes”. A chromosome in GA terminology is usually an array of binary, integer, or real numbers but other representations are possible. For example, an array of real numbers might represent the encoding of coefficients of a polynomial in a curve fitting problem. A “gene” in GA terminology is a single atomic component of a chromosome. In the previous curve fitting example a gene would be a single coefficient.
+A genetic algorithm (GA) is an optimisation method frequently used to find approximate solutions in challenging problem domains. Genetic algorithms are inspired by the biological concept of natural selection. This places genetic algorithms under the category of biologically inspired approaches to optimisation; along with genetic programming, ant colony optimisation, and particle swarm optimisation. Many traditional optimisation techniques rely on the calculation of derivatives and often require detailed knowledge of the search space. GAs on the other hand only require a measure of solution quality, making them well suited to difficult optimisation problems where traditional techniques would otherwise fail.
+In a GA solutions are encoded as “chromosomes”. A chromosome is usually an array of binary, integer, or real numbers but other representations are possible. For example, an array of real numbers might represent the encoding of coefficients of a polynomial in a curve fitting problem. A ``gene'' in GA terminology is a single atomic component of a chromosome. In the previous curve fitting example a gene would be a single coefficient.
 
-A GA proceeds by creating an initial population of randomly generated solutions. From this population a subset of candidates are selected which are used to generate the next population. New solutions are generated from this subset using genetic operators. Their are two fundamental types of genetic operators: crossover and selection. Crossover creates new chromosomes from two or more parent chromosomes by combining portions from each of the parent chromosomes together in some way. Crossover aims to preserve some information about what makes decent solutions between generations. Mutation randomly modifies a chromosome by altering one or more of it’s genes. The mutation operator aims to encourage more exploration of the search space to avoid local minima. Finally, each chromosome in the new population is evaluated according to its fitness. The “fitness” of a chromosome is how well the solution encoded by the chromosome solves the problem. The fitness function is the entirely dependant on the problem domain. In the curve fitting example above the fitness function could be the mean squared error between a dataset and the polynomial represented by a particular chromosome.
+A GA proceeds by creating an initial population of randomly generated solutions. From this population a subset of candidates are selected and used to generate the next population. New solutions are generated from this subset using crossover and selection operators. Crossover creates new chromosomes from two or more parent chromosomes by combining portions from each of the parent chromosomes together. Crossover aims to preserve some information about what makes decent solutions between generations. Mutation randomly modifies a chromosome by altering one or more of its genes. The mutation operator aims to encourage exploration of the search space and avoid local minima. Finally, each chromosome in the new population is evaluated according a measure of quality known as the ``fitness''. The fitness function is the entirely dependant on the problem domain. In the curve fitting example above the fitness function could be the mean squared error of the polynomial represented by a particular chromosome.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\textwidth]{img/tsp_solution_example.png}
-\caption{Example of a solution to a TSP with 30 cities distributed uniformly at random. Each of the blue points represents a city. Each of the red lines indicates which city to travel to next. The solution shown is most likely optimal.}
+\caption{Example of a solution to a TSP with 30 cities distributed uniformly at random. Each of the blue points represents a city. The red lines indicate the order of traversal between cities.}
 \label{fig:tsp-example}
 \end{figure}
 
-The travelling salesman problem (TSP) is a classic mathematical problem well suited for the application of GAs. The premise of the TSP is as follows:
+The travelling salesman problem (TSP) is a classic mathematical problem. The TSP is defined as follows:
 
 \begin{displayquote}
-\textit{Given a list of cities and the distances between each pair of cities, what is the shortest possible route that visits each city exactly once and returns to the origin city?}
+\textit{The traveling salesman problem is a problem ... requiring the most efficient (i.e., least total distance) Hamiltonian cycle a salesman can take through each of $n$ cities.}\cite{weisstein2006traveling}
 \end{displayquote}
-The problem is renowned for being simple to grasp but computationally intensive to calculate an exact solution. The TSP has been shown to be NP-hard and a brute force solution requires O(n!) time. Algorithms with factorial time complexity become unworkable with anything other than very small datasets. GAs easily lend themselves to the travelling salesman problem. A GA makes no guarantees about finding an optimal solution to a TSP, but can be used to find an approximate solution in a reasonable amount of time given decent parameters. It is able to do this faster than with a basic brute force search because a GA will only examine a subset of solutions in the search space that may or may not include the optimum result, but should with good parameters converge towards the optimum solution.
+The problem is simple to understand but computationally intensive to calculate an exact solution. The TSP has been shown to be NP-hard \cite{weisstein2006traveling} and a brute force solution requires $O(n!)$ time.  A GA makes no guarantees about finding an optimal solution to a TSP, but can be used to find an approximate solution in a reasonable amount of time given decent parameters. This is faster than a basic brute force search because a GA will only examine a subset of solutions in the search space that may or may not include the optimum result, but should converge towards the optimum solution with good parameters.
 
 \section{Program Description}
-My solution to this assignment is implemented as a Python package with a basic command line interface. The installation of the package and the operation of the command line interface are described in detail in appendices \ref{appendix:installation} and \ref{appendix:cli} respectively.
+The program for this assignment is implemented as a Python package with a basic command line interface (CLI). The installation of the package and operation of the CLI are described in detail in appendices \ref{appendix:installation} and \ref{appendix:cli}.
 
-The main implementation of the GA algorithm is within the sub-package \textit{tspsolver.ga}. This package contains a separate module for each of the components of the genetic algorithm. It also includes the simulator module, which is responsible for composing each of the components and running the genetic algorithm itself.
+The main implementation of the GA algorithm is within the sub-package \textit{tspsolver.ga}. This contains a separate module for each of the components of the GA. It also includes the \textit{simulator} module, which is responsible for composing each of the components and running the GA itself.
 
-Each of the component modules contains an abstract base class for the particular type of component and several subclasses which provide concrete implementations of specific types of that component. For example, the crossover module contains a class \textit{AbstractCrossoverOperator} which implements operations common to all crossover operators and provides an abstract method \textit{\_crossover\_for\_chromosomes} which all subclasses must implement in order to derive the class. Provided that each of the components implement the specified interface, the \textit{Simulator} class will be able to setup and use the component without knowledge of the implementations details of the concrete component. In software engineering terms this architecture is known as the ``strategy'' design pattern. The strategy enables the behaviour of the algorithm to be dynamically selected at runtime. 
+Each of the modules contains an abstract base class and several subclasses providing concrete implementations of types of the component. For example, the crossover module contains a class \textit{AbstractCrossoverOperator} which implements operations common to all crossover operators and provides an abstract method \textit{\_crossover\_for\_chromosomes} which all subclasses must implement. This allows the \textit{Simulator} class to use each component without knowledge of the implementation details of the concrete component. In software engineering terminology this is known as the ``strategy'' design pattern. The strategy pattern enables the behaviour of the algorithm to be dynamically selected at runtime. 
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\textwidth]{img/class_diagram.png}
-\caption{Class diagram for the simulator class and its components using the strategy pattern. The simulator is composed with one of each type of component. The abstract classes provide and common interface for the components. Concrete implementations of the components derive from the relevant base class}
+\caption{Class diagram for the simulator class and its components using the strategy pattern. The simulator is composed with one of each type of component. The abstract classes provide a common interface for each of the components. Concrete implementations of the components derive from the relevant base class}
 \label{fig:class-diagram}
 \end{figure}
 
 
-My implementation takes this slightly further in that the \textit{Simulator} class which composes the components of the GA together actually dynamically loads the correct components using Python's reflection capabilities according to user supplied string parameters. The parameters for the application are supplied via a command line interface in the form of a JSON file. Information regarding the structure of the parameter file can be found in the appendix \ref{appendix:parameters}
+This implementation takes the pattern slightly further. The \textit{Simulator} class also dynamically loads the correct components using Python's reflection capabilities according to user supplied parameters. The parameters for the application are supplied via the CLI in the form of a JSON file. Information regarding the structure of the parameter file can be found in the README and information on the parameters in appendix \ref{appendix:parameters}.
 
-Once instantiated the \textit{Simulator} takes a 2D matrix with two columns ($x$ and $y$ coordinates) and $n$ rows (equal to the number of cities) as a parameter to the evolve method. The evolve method runs converts the datasets into a distance matrix then approximates a solution using the genetic algorithm.
+Once instantiated the \textit{Simulator} takes a 2D matrix with two columns ($x$ and $y$ coordinates) and $n$ rows (equal to the number of cities) as a parameters to the \textit{evolve} method. This method converts the datasets into a distance matrix which is used to approximate a solution using the GA.
 
-In addition to the main \textit{tspsolver.ga} sub-package there are four other modules. These are really just supporting code for the running the simulator and producing the analysis. These modules are:
+In addition to the main \textit{tspsolver.ga} sub-package there are four other modules. These contain supporting code for running the simulator and setting up the CLI. These modules are:
 
 \begin{itemize}
-	\item \textbf{tsp\_generator} - Implements a small class for generating TSP datasets with uniformly random cities.
-	\item \textbf{command} - Implements the command line interface for running the simulator and includes a couple of file loading and saving routines.
-	\item \textbf{plotting} - Defines some custom plotting functions for producing the graphs used in this report.
-	\item \textbf{tuning} - A basic class for using a grid search to automatically select GA parameters.
+	\item \textbf{tsp\_generator} - Implements a class for generating TSP datasets with uniformly random cities.
+	\item \textbf{command} - Implements the CLI and includes a couple of file I/O routines.
+	\item \textbf{plotting} - Defines a couple of custom plotting functions.
+	\item \textbf{tuning} - Defines a class for running a grid search over a range of GA parameters.
 \end{itemize}
 
 \section{Representation Discussion}
-For my experiments I chose to use a path based representation for chromosomes. In a path based representation each chromosome is represented as an array of integers. The value of each integer element represents a single city in the dataset. In my program this integer corresponds to the $i^{th}$ row in the $2 \times n$ dataset. Each integer's position in the array indicates the order in which it will be visited. For example: in the array $[3, 4, 1, 5, 2]$ the first city to be visited would be city $3$. For city $3$ the tour then moves to city $4$ and from city $4$ to city $1$. 
+The experiments in this report  use a path based representation. In a path based representation each chromosome is an array of positive integers. The value of each integer represents a single city. In this program an integer corresponds to the $i^{th}$ row in the dataset. Each integer's position in the array indicates the order in which it will be visited. For example: in $[3, 4, 1, 5, 2]$ the first city to be visited would be city $3$, followed by city $4$ and then city $1$ etc. 
 
-Obviously since each city in the tour should only be visited once any valid solution should only contain a single occurrence of each city. Likewise because all cities must be visited exactly once each of cities in the dataset must be included in any valid solution. Therefore all valid solutions must be of size $n$ where $n$ is the number of cities in the dataset. In this representation format valid solutions are simply permutations of the enumeration of every city in the dataset.  
+Since each city in the tour must only be visited once any valid solution only contains a single occurrence of each city. Therefore all valid solutions must be of size $n$ where $n$ is the number of cities. In this representation valid solutions are therefore simply permutations of the enumeration of every city in the dataset.
 
-While many different representations of the TSP are possible \cite{larranaga1999genetic}, a path based representation remains the most natural. It is both intuitive for the beginner to understand (of which I am one personally) and has a large array of applicable genetic operators which can be utilised. Other approaches are possible as shown in ref. \cite{larranaga1999genetic}, but these are shown to either have poor results or have peculiarities in their representations. For example in a binary representation there are some seemingly valid encodings for which their are no valid cities.
+While many different representations of the TSP are possible \cite{larranaga1999genetic}, a path based representation remains the most natural. It is both intuitive to understand and has many different genetic operators which can be utilised. Other approaches are possible as discussed in ref. \cite{larranaga1999genetic}, but these are shown to either have poor results or have implementation difficulties. For example, a binary representation has some seemingly valid encodings which represent no valid city.
 
-However, this does not mean that a path based representation is without its downsides. The primary issues with encoding a set of cities as a chromosome for a TSP is ensuring that the genetic operators used will produce valid tours. As mentioned in the preceding paragraphs, a valid tour needs to be a permutation of the enumeration of all cities in the dataset. It is easy to see how traditional naive genetic operators would inevitably create invalid tours by producing a solution that visits the same city twice and excludes one or more cities.
+However, this does not mean that a path based representation is without limitations. The primary issues with encoding a set of cities as a chromosome for a TSP is ensuring that the genetic operators used will produce valid tours.  It is easy to see how traditional naive genetic operators would create invalid tours by producing a solution that visits the same city twice.
 
 \section{Algorithm Components \& Genetic Operators Discussion}
-There are three main types of genetic operators that are typically used as part of a genetic algorithm. These are selection, crossover, and mutation. In my application I have implemented a variety of different genetic operators. Additionally I have used two different techniques for generating  of the initial populations. This section outlines the implementations I have used in the experiments in section \ref{sec:experiments} and provides a justification as to why they were chosen.
+There are three main types of genetic operators that are typically used as part of a GA: selection, crossover, and mutation. This application implements a variety of different genetic operators. Additionally two different techniques for generating the initial populations are provided.
 
 \subsection{Population Generation}
-My genetic algorithm implementation has two different methods of initialising the population. The first type of population generation technique is purely random. The \textit{SimplePopulationGenerator} in the \textit{population\_generation} module simple create the desired population size by creating random permutations of the enumeration of the list of cities. 
+The first type of population generation technique is purely random. The \textit{SimplePopulationGenerator} in the \textit{population\_generation} module creates the desired population size by creating random permutations of the list of cities. 
 
-Random initialisation is very general and works fine for all genetic operators tested in my application. However, it is painfully evident that some initial solutions are going to better than others. In an optimal solution a city will have the city will the shortest distance from it next in the chromosome sequence. In general, over a small local neighbourhood, a good heuristic might be to use the closest neighbours to a city as the adjacent neighbours in the chromosome ordered from closest to largest. 
+Random initialisation is a sensible, general baseline. However, it is obvious that some initial solutions will be better than others. In an optimal solution each city will have a city with a short distance from it next in the sequence. In general, a good heuristic may be to use the closest neighbours to a city as the adjacent entires in the chromosome. 
 
-This will not always yield great chromosome solutions. Contemplate the closest neighbours to a few points i \ref{fig:tsp-example} for a few moments and you will clearly see that the $k^{th}$ nearest element is not necessarily the $k{th}$ element in the optimal tour. However, especially for larger datasets, the cities in the immediate vicinity of one particular city are more likely to end up closer together in the chromosome.
+This will not always yield great solutions. Contemplate the closest neighbours to a few points in \ref{fig:tsp-example} and you will see that the $k^{th}$ nearest element is not necessarily the $k^{th}$ element in the tour. However, especially for larger datasets, the immediate neighbours of one particular city are more likely to end up closer together.
 
-With this intuition I created a second population generator \textit{KNNPopulationGenerator} which uses the $K$-nearest neighbours of a city to generate a chromosome. Specifically the algorithm works as follows: for each element of the population to be created it picks a city at random. An ordered list of the $K$-nearest neighbours to that city are then found where $K$ is equal to the total number of cities. The hope is that this is more likely to lead to initial chromosomes which have some portion of their chromosomes already in the correct place (or nearly in the correct place) than simply choosing at random. 
+With this intuition a second population generator \textit{KNNPopulationGenerator} \cite{pullan2003adapting} is implemented which uses the $K$-nearest neighbours (KNN) of a city to generate a chromosome. The algorithm works as follows: for $i^{th}$ member of the population it picks the $i^{th}$ city. An ordered list of the KNN's to that city are found where $K$ is equal to the $n$. The aim is that this is more likely to lead to initial chromosomes which have some part of their chromosome already close to the correct place compared with choosing at random. To prevent a dramatic reduction in diversity, only a portion of the population is initilised in this way.
 
 \subsection{Selection}
-In genetic algorithm terms, selection is the method by which individuals from the current population are in order to produce a new population through crossover and mutation. A good selection technique should yield more ``good'' chromosomes for reproduction than bad ones. This is because the best solutions in the current population are generally more likely to produce even better offspring in the following generation. 
+In GAs, selection is how individuals from the current population are chosen to produce a new population. A good selection technique should yield more ``good'' chromosomes for reproduction than bad ones. This is because the best solutions in the current population are more likely to produce even better offspring in the following generations.
 
-However, this does not mean that we should always just sort and take the best solutions because this rapidly leads to a lack of diversity. Consider a candidate TSP solution that yields a poor fitness because the just one of the connections geographically cuts from one side of the world to the other. In this scenario the fitness function ranks the solution as poor, but in reality it is quite close to being optimal! If a selection approach naively selects just the best looking solutions we are more likely to head towards local optima and potentially do not explore the full search space.
+This doesn't mean that the best solutions should always be chosen because this rapidly leads to a lack of diversity. Consider a candidate TSP solution that yields a poor fitness because just one of the connections geographically cuts across the whole ``world''. In this scenario the solution is ranked as poor, but in reality it is quite close to being optimal! A selection approach that naively selects just the best looking solutions is more likely to head towards local optima and would potentially fail to explore the full search space.
 
-In my application, I have implemented two classic yet contrasting types of selection operator. The first selection procedure I implemented was \textit{Roulette Wheel} selection \cite{colin2002genetic}. Roulette wheel selection uses a probability distribution over each potential solution to be picked. Solutions are weighted proportionally to their fitness. \textit{Roulette Wheel} selection selects chromosomes are random and proportionally to their weighting. \textit{Roulette Wheel} selection gets its name from the fact that individuals are weighted in proportion to the area of a sector of a roulette wheel \cite{colin2002genetic}.
+The experiments in this report only utilise a single type of selection operator. Originally, two types of selection operator were going to be compared. These were \textit{roulette wheel selection} (RWS) and \textit{tournament selection} (TS) \cite{colin2002genetic}. However RWS was dropped due to slow performance and poor convergence on larger datasets in comparison with TS. RWS is well known to suffer from stochastic noise leading to a large variation in the expected distribution.
 
-I chose to use \textit{Roulette Wheel} selection for two main reasons: firstly, it is very simple to implement and secondly, being one of the most basic techniques, it makes a nice yard stick which other techniques can be compared against. However, this approach has some well know downsides. \textit{Roulette Wheel} selection is well known to often be ``too random''. While candidate solutions are weighted such that more promising individuals are more likely to be picked there is still a huge amount of variation in which solutions actually get picked. This is especially true considering the shear number of solutions generated in even a moderately sized GA problem.
+In TS a small subset of the total population is chosen at random and compared against each other. This program implements \textit{strict} TS,  where the chromosome with the best fitness always ``wins'' the tournament. An alternative formulation would be to use \textit{soft} tournaments where the winner is probabilistically selected proportionally to their fitness.
 
-Because of the limitations of \textit{Roulette Wheel} selection I chose to also implement \textit{Tournament} selection \cite{colin2002genetic}. In \textit{Tournament} selection a subset of the total population of chromosomes is chosen at random. The chromosomes in this random subset are then compared against each other. In my implementation I have decided to make the simplest choice an implement \textit{strict} \textit{Tournament} selection where the chromosome with the biggest fitness is always the ``winner'' of the tournament. An alternative formulation is the use of \textit{soft} tournaments where the winner is probabilistically selected according to their fitness.
-
-\textit{Tournament} selection is a very practical technique that is simple to implement, scales well, and can potentially be parallelised. Another key advantage over \textit{Roulette Wheel} selection is that \textit{Tournament} selection provides a parameter that directly adjusts the selection pressure applied by the selection operator. The selection pressure is the likelihood that an average individual will be selected over the fittest individual. Changing the size of the tournament influences how likely it is that weaker chromosomes will survive the selection process. Bigger tournaments lead to an increase chance of a better individual entering the tournament; therefore increasing the probability that they'll be selected and visa versa. However, it is also worth noting that \textit{Tournament} selection still suffers from the same issues as \textit{Roulette Wheel} selection. The random nature of the algorithm can mean that the distribution you get is skewed and not fully representative.
+\textit{Tournament} selection is a very practical technique that is simple to implement, fast, and can be parallelised. Another key advantage over RWS is that TS provides a parameter that adjusts the selection pressure applied by the  operator. Selection pressure is the likelihood that an average individual will be chosen over the fittest individual. Changing the tournament size influences how likely it is that weaker chromosomes will survive the selection process. Bigger tournaments lead to an increased chance of a better individual entering the tournament causing them to be selected and visa versa. However, it is worth noting that TS, like RWS, still suffers from stochastic noise but the effects are dampened thanks to selection pressure.
 
 \subsection{Crossover}
-The crossover operator is used to recombine selected individuals to form a new population with solutions that are different (and hopefully better) than the previous population. A good crossover operator should attempt to preserve the best portions of the selected chromosomes. Without the counter effect of a mutation operator a good crossover operator should eventually cause the GA to converge to a (possibly not optimal) solution.
+The crossover operator is used to recombine selected individuals to form a new population that is distinct from (and hopefully better) than the previous population. A good crossover operator should preserve the best portions of a chromosome. Without the counter effect of mutation a good crossover operator should naturally cause the GA to converge to a (possibly optimal) solution.
 
-The implementations of the crossover operators that I have used in my application can be found in the \textit{crossover} module. I have implemented three different crossover operators, two of which are fairly similar to one another.
+The crossover operators implemented in this application can all be found in the \textit{crossover} module. There are three distinct operators, two of which are fairly similar. The first two operators are \textit{OnePointPMX} and \textit{TwoPointPMX}. Both of these are variants of \textit{partially mapped crossover} (PMX). As their names suggest the only different in their implementation is the number of pivot points used to produce sub-tours.
 
-The first two operators I have implemented are \textit{OnePointPMX} and \textit{TwoPointPMX}. Both of these are variants of the \textit{partially mapped crossover} (PMX). As their names suggest the only different in their implementation is the number of pivot points used to define which parts of the chromosomes get recombined (similar to regular one and two point crossover). PMX crossover begins by copying some sub section of the parent chromosome to the child. This inevitably leads to an invalid tour because there will be duplicate cities in resulting solution. The PMX operator then repairs the new chromosomes using the mapping of the elements replaced by copying over the sub-tour. The algorithm proceeds by iterating over the parts of the chromosome outside of the copied sub-tour. If a duplicate element is found then it is replaced by inserting the corresponding element that was in original chromosome overwritten by copying the sub-tour using the mapping. PMX is both conceptually simple to understand and to implement. It is similar to regular one and two point crossover but produces valid TSP tours. This makes it a good base line operator to compare other techniques with.
+PMX crossover begins by copying a sub-tour of one parent chromosome to the child. This can lead to an invalid tour because there will be duplicate cities in the resulting solution. PMX repairs the new chromosomes using the mapping between the elements replaced when copying the sub-tour. The algorithm proceeds by iterating over the parts of the chromosome outside of the copied sub-tour. If a duplicate element is found then it is replaced by inserting the corresponding element in the parent chromosome using the mapping. 
+
+PMX is both conceptually simple to understand and to implement. It is similar to regular one and two point crossover but produces valid TSP tours. This makes it a good base line to compare other techniques against.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\textwidth]{img/pmx_diagram.jpg}
-\caption{Shows how the PMX operator creates new valid children. First, sub-tours from the parent are copied to the children. Then the chromosomes are repaired using by looking at what was replaced in the original parent.}
+\caption{Shows how the \textit{TwoPointPMX} operator creates new valid children. First, sub-tours from the parent are copied to the children. Then the chromosomes are repaired by looking at what was replaced in the original parent.}
 \label{fig:pmx-diagram}
 \end{figure}
 
-The other crossover operator that was implemented for this assignment is \textit{OrderCrossover} \cite{moscato1989genetic} (OX). Order crossover begins in a similar manner to PMX. Sub-tours from both chromosomes are chosen from the parents at random and copied to the children. The algorithm differs in how it repairs the chromosomes. To repair the chromosome each element starting from the second pivot point is copied from the second parent to the child in order, skipping those which are already in the copied sub tour. The OX operator has an advantage over PMX because it attempts to preserve the order of the chromosomes that were not copied for the original tour. This should help to prevent the crossover accidentally being too destructive.
+The other crossover operator is \textit{OrderCrossover} (OX) \cite{moscato1989genetic}. Order crossover begins in a similar manner to PMX. Sub-tours from both chromosomes are chosen from the parents at random and copied to the children. The algorithm differs in how it repairs the chromosomes. To repair the chromosome each element starting from the second pivot point is copied from the second parent to the child in order, skipping those which are already in the copied sub tour. The OX operator has an advantage over PMX because it attempts to preserve the order of the chromosomes that were not copied from the original tour. This should help to prevent the crossover accidentally being too destructive.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\textwidth]{img/order_diagram.jpg}
-\caption{Shows how the OX operator creates new valid children. First, sub-tours from the parent are copied to the children. Then the chromosomes are repaired using by copying elements from the second parent in the order they appear, excluding ones which are already included.}
+\caption{Shows how the OX operator creates new valid children. First, sub-tours from the parent are copied to the child. Then the chromosome is repaired using by copying elements from the second parent in the order they appear, excluding ones which are already included.}
 \label{fig:order-diagram}
 \end{figure}
 
@@ -650,25 +650,25 @@ The other crossover operator that was implemented for this assignment is \textit
 
 
 \subsection{Mutation}
-The mutation operator is used to randomly modify selected individuals, usually after crossover. Mutation operators, in contrast to crossover, aim to prevent the algorithm from converging too early and attempt to diversify the population.
+The mutation operator is used to randomly modify chromosomes after crossover. Mutation operators, in contrast to crossover, aim to prevent the algorithm from converging too early and attempt to diversify the population.
 
-In my program I have implemented four different types of mutation operator which are suitable for TSP problems \cite{larranaga1999genetic}. They are: \textit{SwapCity}, \textit{Displacement}, \textit{Inversion} and \textit{Insertion} mutations.
+This program implements four types of mutation operator suitable for TSP problems \cite{larranaga1999genetic}. They are: \textit{SwapCity}, \textit{Displacement}, \textit{Inversion} and \textit{Insertion} mutations.
 
-The \textit{SwapCityMutation} is the most simple mutation that I have implemented for this assignment. This operator chooses two cities at random in the chromosome and swaps their positions. This implementation is perhaps the simplest operator possible and therefore makes a good base line to compare other operators against.
+The \textit{SwapCityMutation} chooses two cities at random and swaps their positions. This is perhaps the simplest mutation operator and therefore makes a good base line to compare other operators against.
 
-The \textit{DisplacementMutation} is the next logical step up from the \textit{SwapCityMutation}. In this operator, instead of swapping two cities within the chromosome a whole sub-tour is moved within the chromosome. The motivation for this operator is that swapping individual cities is often too destructive. Moving a portion of the sub tour should result in being less destructive as good paths are potentially preserved while still exploring the search space.
+The \textit{DisplacementMutation} is the next logical step up from \textit{SwapCityMutation}. In this operator a whole sub-tour is moved within the chromosome. The motivation behind this is that swapping individual cities is often too destructive. Moving a sub-tour should result in being less destructive as good sub-tours are preserved while still exploring the search space.
 
-The \textit{InversionMutation} takes the \textit{DisplacementMutation} another step further. In this mutation type a sub-tour is randomly moved within the chromosome but is also inserted in the reverse order. Again this has the advantage of potentially not being too destructive to good solutions. Additionally this can help solve cases where the GA has found a section good route, but is hampered by a a few long connections at either end of the tour. By reversing the sub-tour before re-insertion could solve this by removing some of the long connections through chance.
+The \textit{InversionMutation} takes \textit{DisplacementMutation} another step further. \textit{InversionMutation} works identically to  \textit{DisplacementMutation} but the sub-tour is inserted in the reverse order. In addition to the benefits of \textit{DisplacementMutation} this can help solve cases where the GA has found a good route, but is hampered by a few long connections at the end of a tour. Reversing the sub-tour before insertion can solve this by removing some of the long connections through chance.
 
-Finally, the \textit{InsertionMutation} is an alternative operator which operates in a similar to the \textit{SwapCityMutation}. With the \textit{InsertionMutation} a single gene is removed from a chromosome and reinserted in another place. This is likely to be useful in cases where a single city is linked to other cities much further away from itself. By mutating randomly inserting the city in a different place it may be that the distance travelled to and from it is reduced.
+Finally, in \textit{InsertionMutation} a single gene is removed from a chromosome and reinserted in another place. This is likely to be useful in cases where a single city is linked to other cities much further away from itself. By randomly inserting the city in a different place it may be that the distance travelled to and from it is reduced.
 
 \section{Experiments Performed}
 \label{sec:experiments}
-This section explains the experiments carried out using the aforementioned system and components described in the preceding sections. For all experiments in this section of the document, unless otherwise noted, the following setup is used: In order to fairly compare the operators a parameter grid is generated for each type of operator. Each set of parameters is tested on a total of $5$ different randomly generated datasets each with $50$ cities. This number was chosen to be high enough to show the differences between parameters and operators, but low enough to make computation time realistic. All parameter sets are tested on the same random datasets to ensure consistency. The median fitness value is taken to represent the test as a whole. This is to ensure that the outcome of the test was not just random chance or affected by a single outlier. 
+This section describes the experiments performed using the system described in the preceding sections. For all experiments, unless otherwise noted, the following setup is used: A parameter grid is generated for each combination of parameters. Each set of parameters is tested on a total of $5$ randomly generated datasets each with $50$ cities. This number was chosen to be high enough to show the differences between parameters, but low enough to make computation time realistic. All parameter sets in the test use the same datasets to ensure consistency. The median fitness value is taken to represent the whole parameter set. This ensures that the outcome of the test was not just random chance or affected by a single outlier. 
 
 \subsection{Crossover and Mutation operators}
 \label{subsec:cross-vs-mutate-operators}
-The first experiment examines which of the crossover and mutation operators work best together. Table \ref{table:cross-vs-mutate} shows the summary results of comparing the crossover operators against mutation operators. Figure \ref{fig:cross-vs-mutate} shows the fitness of each operator combination over a number of $1000$ epochs for a single trial.
+The first experiment examines how crossover and mutation operators work together. Table \ref{table:cross-vs-mutate} shows the results comparing the crossover operators against mutation operators. Figure \ref{fig:cross-vs-mutate} shows the fitness of each operator combination over $1000$ epochs for a single trial.
 
 \begin{figure}[H]
 \centering
@@ -679,24 +679,16 @@ The first experiment examines which of the crossover and mutation operators work
 
 \subsection{Crossover and Mutation Parameters}
 \label{subsec:crossover-mutation-parameters}
-Motivated by the results of this experiment and constrained by the size limits of this report and the time complexity of calculating many runs on multiple parameters sets the findings for the remaining experiments will use \textit{OrderCrossover} with \textit{InversionMutation} with mutation and crossover parameters selected using a grid search as described above over a small range of sensible parameter choices.
+Motivated by the results of this experiment and constrained by the size limits of this report and the time complexity of calculating many runs on multiple parameters sets the findings for the remaining experiments will use \textit{OrderCrossover} with \textit{InversionMutation}.
 
-This section presents the results of searching for those parameters over a range of possible values. Table \ref{table:cross-vs-mutate-params} shows the results of running a grid search over a small range of possible values for the probability of crossover and mutation. The general trend in towards a larger crossover and mutation rate.
+Table \ref{table:cross-vs-mutate-params} shows the results of running a grid search over a small range of possible values for the probability of crossover and mutation. The general trend is towards a larger crossover and mutation rate.
 
 \begin{table*}[t]
 \centering
 \input{tables/selection_vs_pop_size.tex}
-\caption{Median fitness of running each of the different types parameter values for population size and tournament size with \textit{TournamentSelection}. For all tests \textit{OrderCrossover} and \textit{InversionMutation} are used. All runs used a $0.9$ crossover rate and a $0.2$ mutation rate based on the results in section \ref{subsec:crossover-mutation-parameters}. Each was run for a total of $1000$ generations.}
+\caption{Median fitness of running each of the different parameter values for population size and tournament size with \textit{TournamentSelection}. For all tests \textit{OrderCrossover} and \textit{InversionMutation} are used. All runs used a $0.9$ crossover rate and a $0.2$ mutation rate based on the results in section \ref{subsec:crossover-mutation-parameters}. Each was run for a total of $1000$ generations.}
 \label{table:selection-vs-pop-size}
 \end{table*}
-
-\begin{table*}[t]
-\centering
-\input{tables/selection_vs_pop_size2.tex}
-\caption{Median fitness of running each of the different population sizes with \textit{RouletteWheelSelection}. For all tests \textit{OrderCrossover} and \textit{InversionMutation} are used. All runs used a $0.9$ crossover rate and a $0.2$ mutation rate based on the results in section \ref{subsec:crossover-mutation-parameters}. Each was run for a total of $1000$ generations. No results successfully converged}
-\label{table:selection-vs-pop-size2}
-\end{table*}
-
 
 \begin{figure}[H]
 \centering
@@ -705,9 +697,6 @@ This section presents the results of searching for those parameters over a range
 \label{fig:cross-vs-mutate-params}
 \end{figure}
 
-\subsection{Selection Operators}
-\label{subsec:selection-parameters}
-This section looks at the effect of modifying the selection parameters for both \textit{TournamentSelection} and \textit{RouletteWheelSelection}. Once again this has been limited to just using \textit{OrderCrossover} and \textit{InversionMutation}. The crossover and mutation rates for each run are fixed to $0.9$ and $0.2$ based on the results of prior testing in the previous section. The method used in this section is the same as the previous sections. $50$ data points are used for each run. Sadly \textit{RouletteWheelSelection} failed to converge in all trials. Table \ref{table:selection-vs-pop-size} shows the results for the trails on population size versus tournament size for \textit{TournamentSelection}. Table \ref{table:selection-vs-pop-size2} shows the results of different population sizes for \textit{RouletteWheelSelection}. Figure \ref{fig:tournament-selection-convergence} shows a single trial run with varying population sizes and tournament sizes.
 
 \begin{figure}[H]
 \centering
@@ -716,53 +705,56 @@ This section looks at the effect of modifying the selection parameters for both 
 \label{fig:tournament-selection-convergence}
 \end{figure}
 
-\begin{table*}[t]
-\centering
-\input{tables/elite_fitness.tex}
-\caption{This shows a trial run on three different settings for the elites parameter. This run uses a similar setup to the proceeding section, but uses tournament size of $10$ and population size of $40$. This suggests that maintaining one elite chromosome between populations produces the best results.}
-\label{table:elite-fitness}
-\end{table*}
 
 \begin{table*}[t]
 \centering
 \input{tables/knn_fitness.tex}
-\caption{The fitness for a batch of $5$ datasets each containing $100$ cities.}
+\caption{The fitness for a batch of $5$ datasets each containing $100$ cities with different population initialisation strategies.}
 \label{table:knn-fitness}
 \end{table*}
 
-\subsection{Elitism}
-This section shows the effects of adding elitism to the genetic algorithm. Elitism allows all algorithm to copy $x$ number of chromosomes unaltered from one generation to another. This ensures that the algorithm doesn't accidentally ``forget'' the its best result.
-
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.5\textwidth]{figures/elite_convergence.png}
-\caption{Shows the convergence of one run for each setting of the elite parameter. Again, like other trials this used $50$ cities.}
-\label{fig:elite-convergence}
-\end{figure}
-
-\subsection{Population Initialisation}
-This section shows the effects of using different population initialisation strategies. Table \ref{table:knn-fitness} shows the effect of running the same experimental setup with different population generators. For the \textit{KNNPopulationGenerator} a parameter specifies the proportion of the chromosomes that are generated by taking the KNN neighbours. Figure \ref{fig:knn-convergence} shows the convergence of one trial for each parameter set. In both cases datasets containing $100$ cities were used. This is so that the difference can be clearly seen. The setup for these trials used the same parameters as section \ref{subsec:selection-parameters} but also include a single elite chromosome in each generation.
-
+\newpage
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\textwidth]{figures/knn_convergence.png}
-\caption{Shows the convergence of the different settings for population generation for one trail over a dataset of $100$ cities. It can be clearly seen that the KNN approach leads to faster convergence.}
+\caption{Shows the convergence of the different settings for population generation for one trial over a dataset of $100$ cities. It can be clearly seen that the KNN approach leads to faster convergence.}
 \label{fig:knn-convergence}
 \end{figure}
 
+\subsection{Selection Operators}
+\label{subsec:selection-parameters}
+This experiment examines the selection parameters \textit{TournamentSelection}. Once again this has been limited to just using \textit{OrderCrossover} and \textit{InversionMutation}. Crossover and mutation rates are fixed to $0.9$ and $0.2$ based on the results of the previous section. Table \ref{table:selection-vs-pop-size} shows the results for the trials on population size versus tournament size for \textit{TournamentSelection}. Figure \ref{fig:tournament-selection-convergence} shows a single trial run with varying population and tournament sizes.
+
+
+\subsection{Population Initialisation}
+Table \ref{table:knn-fitness} shows the effect of running the same experimental setup with different population generators. For the \textit{KNNPopulationGenerator} a parameter specifies the proportion of the chromosomes that are generated by taking the KNN neighbours. Figure \ref{fig:knn-convergence} shows the convergence of one trial for each parameter set. In both cases datasets containing $100$ cities were used. This is to better accentuate the differences.
 
 \section{Discussion and Analysis}
-Section \ref{subsec:cross-vs-mutate-operators} compared the differences between a variety of different crossover and mutation operators. In these experiments \textit{OrderCrossover} was consistently the best crossover operator out of the three. This matches my expectations because order crossover is designed to better preserve the order of chromosome elements. This is obviously very important in problems such as the TSP where the order is perhaps the most import part of the solution rather than just the producing valid tours. I would suggest that order based crossover better encodes heuristics about the problem domain than PMX.
+Section \ref{subsec:cross-vs-mutate-operators} compared different crossover and mutation operators. In these experiments \textit{OrderCrossover} was consistently the best crossover operator out of the three. This matches expectations because OX is designed to preserve the order of chromosome elements. In problems such as the TSP the order is perhaps the most import part of the solution rather than just the producing valid tours. I would suggest that OX better encodes heuristics about the problem domain compared to PMX.
 
-Comparing the mutation operators shows that \textit{InversionMutation} appears to produce the best results and \textit{SwapCity} mutation produces the worst. This seems to be a reasonable result. Logically the \textit{SwapCity} mutation should be more destructive than the displacement and inversion operations which both keep whole portions of the chromosome in order. As order is the most important aspect of the TSP these mutations must be able to push the GA to explore the search space effectively without being overly destructive, hence the better results. It's also worth noting that the insertion mutation achieves results that are very similar to the displacement mutation and much better than just swapping cities. I found this to be slightly unexpected. It could just be that this operator performed better because it's slightly less destructive to the order or it could just be a statistical fluke.
+Comparing the mutation operators shows that \textit{InversionMutation} appears to produce the best results and \textit{SwapCityMutation} produces the worst. Logically the \textit{SwapCityMutation} should be more destructive than the displacement and inversion operations which keep whole portions of the chromosome in order. As order is key to solving the TSP these mutations must be able to push the GA to explore the search space effectively without being overly destructive. It's worth noting that the \textit{InsertionMutation} achieves results that are very similar to the \textit{DisplacementMutation} and much better than just swapping cities. This was slightly unexpected. It could just be that this operator performed better because it's slightly less destructive to the order or it could just be a statistical fluke.
 
-In terms of the probability of crossover and mutation parameters used results in section \ref{subsec:crossover-mutation-parameters} clearly show a tendency to prefer larger crossover and mutation rates. Looking at table \ref{table:cross-vs-mutate-params} it can be clearly seen that the results definitively become better towards the bottom right. What is also interesting in this result is that the effect of changing the mutation parameter has a larger effect on the results of the experiment than the probability of crossover. Comparing this with figure \ref{fig:cross-vs-mutate-params} shows that increasing the mutation rate increases the chance of the genetic algorithm finding a better solution. The effect of the crossover rate appears to be a little more subtle. Looking closely at figure \ref{fig:cross-vs-mutate-params} shows having a very high crossover rate ($0.9$) causes the GA to plateau earlier. I.e. a high crossover rate causes the GA to converge faster but not necessarily to the best solution. However, when combined with a hight mutation rate, it can be seen that the convergence rate becomes more consistent, although not identical.
+The crossover and mutation rate results (section \ref{subsec:crossover-mutation-parameters}) clearly shows a tendency towards larger crossover and mutation rates. Looking at table \ref{table:cross-vs-mutate-params} it can be seen that the results definitively become better towards the bottom right. What is also interesting in this result is that the effect of changing the mutation rate has a larger effect on the results than the crossover rate. Comparing this with figure \ref{fig:cross-vs-mutate-params} shows that increasing the mutation rate increases the chance of the GA finding a better solution. 
 
-The results of testing the selection operator show some interesting insights. Unfortunately here roulette wheel selection failed to converge in any tests. I believe this is down to the fact that the GA becomes ``too random''. In contrast to tournament selection, roulette wheel selection is less likely to draw a consistent distribution of chromosomes. Therefore while it may find a good solution, there's less of a guarantee that the solution will make it to the next generation than with tournament selection. This combined with the destructive effects of mutation most likely combine to make convergence difficult. I ran some additional trials (not included) with a much lower mutation rate ($0.01$) and larger population size ($50$) in order to encourage a better result with no success.
+The effect of the crossover rate appears to be more subtle. Looking at figure \ref{fig:cross-vs-mutate-params} shows that a very high crossover rate ($0.9$) causes the GA to plateau earlier. I.e. a high crossover rate causes the GA to converge faster but not necessarily to the best solution. However, when combined with a high mutation rate, the convergence becomes more consistent, although not identical.
+
+Testing the selection operator shows some interesting insights. Looking at table \ref{table:selection-vs-pop-size} and figure \ref{fig:tournament-selection-convergence} a clear relationship can be seen between the population size used and the tournament size. Best results were achieved with both a large population and tournament size. Another interesting point is that like the relationship between the mutation and crossover parameters the difference between the values becomes smaller as the parameters increase. This suggests two things 1)  there is an optimum setting between the two parameters and 2) that increasing them indefinitely will probably not significantly improve GA performance. Also, in figure \ref{fig:tournament-selection-convergence} it can be seen that a very small tournament size ($3$) stifles the diversity and makes it harder for the algorithm to make progress.
+
+The results in table \ref{fig:knn-convergence} show the a direct relationship where the fitness of the population decreases in proportion to the number of KNN based chromosomes used. This is backed up by figure \ref{fig:knn-convergence} which shows a difference in the initial rate of convergence between random population generation and all settings of KNN population generation. As predicted this difference was more prominent with a greater number of cities hence why $100$ cities where used.
 
 \section{Conclusions and Future Work}
+In conclusion, a few interesting global trends have been identified in applying GAs to the TSP. One trend appears to be that the best choice of crossover and mutation operators are ones which maximally preserve the order of sub-tours. This might prevent the algorithm from loosing good portions of candidate solutions and convergence on local minima.
+
+Secondly, it seems that high crossover and mutation rates are preferred. In particular the mutation rate seems to make the highest impact on the rate at which a GA stabilises on a particular solution. The crossover rate also has an impact, but it's effect is less prominent.
+
+TS appeared was more stable than RWS. With tournament selection a larger population size and tournament size increase performance. However, the tournament size and in particular the population size significantly impacts the time complexity. Combined with the fact that increasing these parameters doesn't linearly increase performance  confirms that a balance is required between selection parameters and computation time.
+
+The use of KNN population generation can provide a useful increase to the performance of an algorithm. KNN population generation can lead to faster convergence and better solutions by starting with better chromosomes. But a balance must be struck to prevent decreasing diversity.
+
+GAs appear to be well suited to the problem of solving the TSP. With this system good solutions could be found for 30 to 50 cities, but quality deteriorated beyond this. However, the requirement that the genes must be unique and that ordering is important is a handicap for GAs. It would be interesting to investigate the effect of ant colony optimisation on the TSP as this approach more naturally lends itself to path finding in comparison to a GA.
+
+Finally, there are several areas which have not been fully explored here, but which could be explored in future work. This includes modifying the implementation to use multiprocessing. GAs naturally lead themselves to parallelisation and such an implementation would make it easier to run larger parameter sets. Another idea would be to explore modification of the population and parameters over time. This could use approaches such as simulated annealing to control crossover \& mutation parameters or to reintroduce diversity using approaches such as random offspring generation \cite{rocha1999preventing} or social disasters \cite{kureichick1996some}.
 
 
 % needed in second column of first page if using \IEEEpubid
@@ -874,130 +866,130 @@ The results of testing the selection operator show some interesting insights. Un
 \appendices
 \clearpage
 
-%\section{Installation of Program}
-%\label{appendix:installation}
-%Installation is easiest using the \textit{pip} package manager. Python version $2.7.9+$ automatically ship with \textit{pip}. If you're using an older version of Python you can find the installation instructions at http://pip.readthedocs.org/en/stable/installing/.
-%
-%To install the program locally \textit{cd} into the top level directory of the project and run the following:
-%
-%\begin{lstlisting}[language=Bash]
-%pip install -e .	
-%\end{lstlisting}
-%
-%
-%All of the project dependancies should be installed automatically. If for some reason they are not, the full list of dependancies are:
-%
-%\begin{itemize}
-%	\item numpy
-%	\item scipy
-%	\item pandas
-%	\item scikit-learn
-%	\item matplotlib
-%	\item click
-%\end{itemize}
-%
-%\section{Command Line Interface}
-%\label{appendix:cli}
-%There are three major commands: \textit{generate}, \textit{solve} and \textit{tune}. 
-%
-%\subsection{Generating Datasets}
-%The generate command will create a uniformly random TSP dataset and output it to the specified CSV file.
-%
-%\begin{lstlisting}[language=Bash]
-%tspsolver generate dataset.csv	
-%\end{lstlisting}
-%
-%Optionally, it can also take a parameter specifying the number of cities to generate (default is 10):
-%
-%\begin{lstlisting}[language=Bash]
-%tspsovler generate -n 30 dataset.csv	
-%\end{lstlisting}
-%
-%
-%\subsection{Solving TSP problems}
-%The ```solve``` command can be used to run the genetic algorithm and produce solutions to the problems. The command takes a JSON parameter file as an argument. Optionally you can provide a dataset file (such as produced by the ```generate``` command) or specify a random number of cities to generate. When the command terminates, two plots are produced. One shows the min, mean, and max fitness across all generations, the second shows the best solution found over all datasets.
-%
-%Example Parameter File:
-%\begin{lstlisting}
-%{
-%    "num_epochs": 1000,
-%    "num_elites": 2,
-%    "generator": "SimplePopulationGenerator",
-%    "generator_population_size": 20,
-%    "selector": "RouletteWheelSelection",
-%    "selector_tournament_size": 5,
-%    "crossover": "OrderCrossover",
-%    "crossover_pcross": 0.9,
-%    "mutator": "InversionMutation",
-%    "mutator_pmutate": 0.1
-%}
-%\end{lstlisting}
-%
-%Solving a TSP problem with a randomly generated TSP dataset:
-%
-%\begin{lstlisting}[language=Bash]
-%tspsolver solve -n 20  params.json
-%\end{lstlisting}
-%
-%Solving a TSP problem with an exisitng dataset:
-%\begin{lstlisting}[language=Bash]
-%tspsolver solve -f dataset.csv params.json
-%\end{lstlisting}
-%
-%\subsection{Tuning Parameters}
-%The final command can be used to run a range of parameter configurations over a number of different datasets. This can be useful to examine the effects of different parameter datasets. Each configuration is run on ```n``` different randomly generated datasets and the median result is take to represent the whole. The results for all datasets are saved to a CSV file. The configuration that produced the best results is also saved to a JSON file.
-%
-%This command takes a special parameter file that specifies ranges of parameters. An example is shown below:
-%
-%\begin{lstlisting}
-%{
-%    "num_epochs": [1000],
-%    "num_elites": [0],
-%    "generator": ["SimplePopulationGenerator"],
-%    "generator_population_size": [20],
-%    "selector": ["TournamentSelection"],
-%    "selector_tournament_size": [5],
-%    "crossover": ["OrderCrossover"],
-%    "crossover_pcross": [0.6, 0.7, 0.8, 0.9],
-%    "mutator": ["InversionMutation"],
-%    "mutator_pmutate": [0.01, 0.05, 0.1, 0.2]
-%}
-%\end{lstlisting}
-%
-%This will run the genetic algorithm with a varying range of crossover and mutation probabilities. An example of running the tuning command is as follows:
-%
-%\begin{lstlisting}[language=Bash]
-%tspsolver tune -d 5 -n 50 tuning_params.json results.csv best.json
-%\end{lstlisting}
-%
-%In the above command the \textit{-d} command specifies the number of datasets to generate for each parameter configuration. The \textit{-n} flag specifies the number of random generated points to use for each dataset. \textit{tuning\_params.json} is the special parameter file with ranges. \textit{results.csv} is the CSV file created with all parameter results. \textit{best.json} is the generated parameter file containing the parameters that produced the best run.
-%
-%\clearpage
-%\onecolumn
-%\section{Parameters}
-%\label{appendix:parameters}
-%This appendix provides an overview of the different parameters that can be used with the system with example values and a description of what the parameter controls.
-%
-%
-%\begin{table}[ht]
-%    \begin{tabular}{l | l | p{11cm} }
-%    Parameter                   & Example Value              & Description                                                                                                                               \\ \hline
-%    num\_epochs                 & 1000                       & The number of epochs to run the genetic algorithm for.                                                                                    \\ 
-%    num\_elites                 & 2                          & The number of elites to carry over the the next generation.                                                                               \\
-%    generator                   & SimplePopulationGeneration & The type of generator to use to initialise the population. This can either be \textit{SimplePopulationGeneration} or \textit{KNNPopulationGenerator}.       \\
-%    generator\_population\_size & 20                         & Specifies the population size of the genetic algorithm                                                                                    \\
-%    generator\_random\_proportion & 0.5						 & When using KNN population generation this controls the ratio of individuals selected using KNN relative to the number of random chromosomes. Must be in the range $0 \leq x \leq 1$ \\ 
-%    selector                    & TournamentSelection        & Specifies which type of selection to use. This can either be \textit{TournamentSelection} or \textit{RouletteWheelSelection}                                \\
-%    selector\_tournament\_size  & 5                          & When using tournament selection this controls the size of the tournament used.                                                            \\
-%    crossover                   & OrderCrossover             & Specifies the crossover operator to use. This can be one of: \textit{OrderCrossover}, \textit{OnePointPMX}, or \textit{TwoPointPMX}.                                 \\
-%    crossover\_pcross           & 0.9                        & This controls the probability that crossover will occur.  Must be in the range $0 \leq x \leq 1$                                                \\
-%    mutator                     & InversionMutation          & Specifies the mutation operator to use. This can be one of: \textit{SwapCityMutation}, \textit{InversionMutation}, \textit{InsertionMutation}, \textit{DisplacementMutation}. \\
-%    mutator\_pmutate            & 0.1                        & This controls the probability that mutation will occur. Must be in the range $0 \leq x \leq 1$                                                  \\
-%    \end{tabular}
-%\end{table}
-%
-%\clearpage
-%\twocolumn
+\section{Installation of Program}
+\label{appendix:installation}
+Installation is easiest using the \textit{pip} package manager. Python version $2.7.9+$ automatically ships with \textit{pip}. If you're using an older version of Python you can find the installation instructions at http://pip.readthedocs.org/en/stable/installing/.
+
+To install the program locally \textit{cd} into the top level directory of the project and run the following:
+
+\begin{lstlisting}[language=Bash]
+pip install -e .	
+\end{lstlisting}
+
+
+All of the project dependancies should be installed automatically. If for some reason they are not, the full list of dependancies are:
+
+\begin{itemize}
+	\item numpy
+	\item scipy
+	\item pandas
+	\item scikit-learn
+	\item matplotlib
+	\item click
+\end{itemize}
+
+\section{Command Line Interface}
+\label{appendix:cli}
+There are three major commands: \textit{generate}, \textit{solve} and \textit{tune}. 
+
+\subsection{Generating Datasets}
+The generate command will create a uniformly random TSP dataset and output it to the specified CSV file.
+
+\begin{lstlisting}[language=Bash]
+tspsolver generate dataset.csv	
+\end{lstlisting}
+
+Optionally, it can also take a parameter specifying the number of cities to generate (default is 10):
+
+\begin{lstlisting}[language=Bash]
+tspsovler generate -n 30 dataset.csv	
+\end{lstlisting}
+
+
+\subsection{Solving TSP problems}
+The \textit{solve} command can be used to run the genetic algorithm and produce solutions to TSP problems. The command takes a JSON parameter file as an argument. Optionally you can provide a dataset file (such as produced by the \textit{generate} command) or specify a random number of cities to generate. When the command terminates, two plots are produced. One shows the min, mean, and max fitness across all generations, the second shows the best solution found over all datasets.
+
+Example Parameter File:
+\begin{lstlisting}
+{
+    "num_epochs": 1000,
+    "num_elites": 2,
+    "generator": "SimplePopulationGenerator",
+    "generator_population_size": 20,
+    "selector": "RouletteWheelSelection",
+    "selector_tournament_size": 5,
+    "crossover": "OrderCrossover",
+    "crossover_pcross": 0.9,
+    "mutator": "InversionMutation",
+    "mutator_pmutate": 0.1
+}
+\end{lstlisting}
+
+Solving a TSP problem with a randomly generated TSP dataset:
+
+\begin{lstlisting}[language=Bash]
+tspsolver solve -n 20  params.json
+\end{lstlisting}
+
+Solving a TSP problem with an exisitng dataset:
+\begin{lstlisting}[language=Bash]
+tspsolver solve -f dataset.csv params.json
+\end{lstlisting}
+
+\subsection{Tuning Parameters}
+The final command can be used to run a range of parameter configurations over a number of different datasets. This can be useful to examine the effects of different parameter datasets. Each configuration is run on $n$ different randomly generated datasets and the median result is taken to represent the whole. The results for all datasets are saved to a CSV file. The configuration that produced the best results is also saved to a JSON file.
+
+This command takes a special parameter file that specifies ranges of parameters. An example is shown below:
+
+\begin{lstlisting}
+{
+    "num_epochs": [1000],
+    "num_elites": [0],
+    "generator": ["SimplePopulationGenerator"],
+    "generator_population_size": [20],
+    "selector": ["TournamentSelection"],
+    "selector_tournament_size": [5],
+    "crossover": ["OrderCrossover"],
+    "crossover_pcross": [0.6, 0.7, 0.8, 0.9],
+    "mutator": ["InversionMutation"],
+    "mutator_pmutate": [0.01, 0.05, 0.1, 0.2]
+}
+\end{lstlisting}
+
+This will run the genetic algorithm with a varying range of crossover and mutation probabilities. An example of running the tuning command is as follows:
+
+\begin{lstlisting}[language=Bash]
+tspsolver tune -d 5 -n 50 tuning_params.json results.csv best.json
+\end{lstlisting}
+
+In the above command the \textit{-d} command specifies the number of datasets to generate for each parameter configuration. The \textit{-n} flag specifies the number of random generated points to use for each dataset. \textit{tuning\_params.json} is the special parameter file with ranges. \textit{results.csv} is the CSV file created with all parameter results. \textit{best.json} is the generated parameter file containing the parameters that produced the best run.
+
+\clearpage
+\onecolumn
+\section{Parameters}
+\label{appendix:parameters}
+This appendix provides an overview of the different parameters that can be used with the system with example values and a description of what the parameter controls.
+
+
+\begin{table}[ht]
+    \begin{tabular}{l | l | p{11cm} }
+    Parameter                   & Example Value              & Description                                                                                                                               \\ \hline
+    num\_epochs                 & 1000                       & The number of epochs to run the genetic algorithm for.                                                                                    \\ 
+    num\_elites                 & 2                          & The number of elites to carry over the the next generation.                                                                               \\
+    generator                   & SimplePopulationGeneration & The type of generator to use to initialise the population. This can either be \textit{SimplePopulationGeneration} or \textit{KNNPopulationGenerator}.       \\
+    generator\_population\_size & 20                         & Specifies the population size of the genetic algorithm                                                                                    \\
+    generator\_random\_proportion & 0.5						 & When using KNN population generation this controls the ratio of individuals selected using KNN relative to the number of random chromosomes. Must be in the range $0 \leq x \leq 1$ \\ 
+    selector                    & TournamentSelection        & Specifies which type of selection to use. This can either be \textit{TournamentSelection} or \textit{RouletteWheelSelection}                                \\
+    selector\_tournament\_size  & 5                          & When using tournament selection this controls the size of the tournament used.                                                            \\
+    crossover                   & OrderCrossover             & Specifies the crossover operator to use. This can be one of: \textit{OrderCrossover}, \textit{OnePointPMX}, or \textit{TwoPointPMX}.                                 \\
+    crossover\_pcross           & 0.9                        & This controls the probability that crossover will occur.  Must be in the range $0 \leq x \leq 1$                                                \\
+    mutator                     & InversionMutation          & Specifies the mutation operator to use. This can be one of: \textit{SwapCityMutation}, \textit{InversionMutation}, \textit{InsertionMutation}, \textit{DisplacementMutation}. \\
+    mutator\_pmutate            & 0.1                        & This controls the probability that mutation will occur. Must be in the range $0 \leq x \leq 1$                                                  \\
+    \end{tabular}
+\end{table}
+
+\clearpage
+\twocolumn
 
 %Some text for the appendix.
 

@@ -110,7 +110,6 @@ class Simulator():
         fitness = self._selector.get_fitness()
         sorted_population = population[np.argsort(fitness)]
         new_population[:self._num_elites] = sorted_population[:self._num_elites]
-        new_population = np.vstack((new_population, sorted_population[:self._num_elites]))
         return new_population
 
     def _find_best_solution(self, population):
