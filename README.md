@@ -1,7 +1,7 @@
 # TSP Solver
 [![Build Status](https://magnum.travis-ci.com/samueljackson92/tsp-solver.svg?token=BaPtpk9DsGYbbzV8h1jS&branch=master)](https://magnum.travis-ci.com/samueljackson92/tsp-solver)
 
-Solving Travelling Salesman Problems with Genetic Algorithms. Originally for SEM6120.
+Solving Travelling Salesman Problems with Genetic Algorithms. Originally for SEM6120. Documentation for this project is located in the doc/build/html folder.
 
 ## Installation
 Installation is easiest using the ```pip``` package manager. Python version 2.7.9+ automatically ship with ```pip```. If you're using an older version of Python you can find the installation instructions [here](http://pip.readthedocs.org/en/stable/installing/).
