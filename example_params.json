@@ -1,0 +1,13 @@
+{
+    "num_epochs": 1000,
+    "num_elites": 1,
+    "generator": "SimplePopulationGenerator",
+    "generator_population_size": 100,
+    "selector": "TournamentSelection",
+    "selector_tournament_size": 10,
+    "crossover": "OrderCrossover",
+    "crossover_pcross": 0.7,
+    "use_rog": false,
+    "mutator": "InversionMutation",
+    "mutator_pmutate": 0.01
+}
