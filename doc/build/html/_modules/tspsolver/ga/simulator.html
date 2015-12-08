@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tspsolver.ga.simulator &mdash; TSP Solver 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="TSP Solver 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for tspsolver.ga.simulator</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance_matrix</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Simulator"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator">[docs]</a><span class="k">class</span> <span class="nc">Simulator</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new simulator.</span>
+
+<span class="sd">        This will setup a genetic algorithm with the necessary genetic operators</span>
+<span class="sd">        with their corresponding parameters ready to be evolved.</span>
+
+<span class="sd">        :param generator: a generator object derived from AbstractPopulationGenerator</span>
+<span class="sd">        :param selector: a selection operator derived from AbstractSelectionOperator</span>
+<span class="sd">        :param crossover: a crossover operator derived from AbstractCrossoverOperator</span>
+<span class="sd">        :param mutator: a mutation operator derived from AbstractMutationOperator</span>
+<span class="sd">        :param num_epochs: the number of interations to run the simulation.</span>
+<span class="sd">        :param num_elites: the number of elite chromosomes to carry over.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_average_fitness</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_fitness</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="Simulator.evolve"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.evolve">[docs]</a>    <span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evolve a solution to the TSP problem.</span>
+
+<span class="sd">        :param distance_matrix: a distance matrix for the points in the dataset</span>
+<span class="sd">        :return: chromosome representing the best solution found.</span>
+<span class="sd">        :rtype: 1Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initilize_population</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_epochs</span><span class="p">):</span>
+            <span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_genetic_operations</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">dm</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache_epoch_performance</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_best_solution</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_progress</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_final_output</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_ever_solution</span>
+</div>
+    <span class="k">def</span> <span class="nf">_cache_epoch_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Store the min, max, and average of each generation</span>
+
+<span class="sd">        This is useful for plotting to check convergance progression.</span>
+
+<span class="sd">        :param population: the current population of solutions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">get_fitness</span><span class="p">()</span>
+        <span class="n">min_fitness</span> <span class="o">=</span> <span class="n">fitness</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_average_fitness</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fitness</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_fitness</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_fitness</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fitness</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_log_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Log the progress made every 100 iterations</span>
+
+<span class="sd">        :param iteration: the current number of iterations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;------------------------------------------------&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Iteration </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">iteration</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Current best solution fitness: </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Best ever solution fitness:    </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_log_final_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Log a final output message on completion&quot;&quot;&quot;</span>
+        <span class="n">total_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;------------------------------------------------&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;FINISHED!&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Current best solution fitness: </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Best ever solution fitness:    </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Execution Time:        </span><span class="si">%.2f</span><span class="s">s&quot;</span> <span class="o">%</span> <span class="n">total_time</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_genetic_operations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply each of the genetic operators</span>
+
+<span class="sd">        Order of operations is to perform selection, crossover, mutation,</span>
+<span class="sd">        and finally elitism.</span>
+
+<span class="sd">        :param population: the current population of solutions</span>
+<span class="sd">        :param distance_matrix: distance matrix for points in the dataset</span>
+<span class="sd">        :return: a new population with the operators applied</span>
+<span class="sd">        :rtype: 2Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform_selection</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">)</span>
+        <span class="n">new_population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform_crossover</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+        <span class="n">new_population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform_mutation</span><span class="p">(</span><span class="n">new_population</span><span class="p">)</span>
+        <span class="n">new_population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_elitism</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">new_population</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_population</span>
+
+    <span class="k">def</span> <span class="nf">_apply_elitism</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">new_population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply elitism to the new population</span>
+
+<span class="sd">        Replace n new solutions with exact copies of the n best solutions from</span>
+<span class="sd">        the previous generation. n is specified by the constructor parameter</span>
+<span class="sd">        num_elites.</span>
+
+<span class="sd">        :param population: the old population of solutions</span>
+<span class="sd">        :param new_population: the new population of solutions</span>
+<span class="sd">        :return: new population with elites carried over</span>
+<span class="sd">        :rtype: 2Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">get_fitness</span><span class="p">()</span>
+        <span class="n">sorted_population</span> <span class="o">=</span> <span class="n">population</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">fitness</span><span class="p">)]</span>
+        <span class="n">new_population</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_elites</span><span class="p">]</span> <span class="o">=</span> <span class="n">sorted_population</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_elites</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">new_population</span>
+
+    <span class="k">def</span> <span class="nf">_find_best_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find the best solution in a population</span>
+
+<span class="sd">        :param population: a 2Darray representing a population</span>
+<span class="sd">        :return: the chromosome encoding the best solution</span>
+<span class="sd">        :retype: 1Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">get_fitness</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">population</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">fitness</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">_set_best_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the best solution if the current generation yielded one</span>
+<span class="sd">        better than the last generation</span>
+
+<span class="sd">        :param population: a 2Darray representing a population</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">best_solution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_best_solution</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_best_ever_solution</span> <span class="o">=</span> <span class="n">best_solution</span>
+
+<div class="viewcode-block" id="Simulator.get_averge_fitness"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.get_averge_fitness">[docs]</a>    <span class="k">def</span> <span class="nf">get_averge_fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the averge fitness of over all iterations</span>
+
+<span class="sd">        :return: list of the average fitness over all iterations</span>
+<span class="sd">        :rtype: 1Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_average_fitness</span>
+</div>
+<div class="viewcode-block" id="Simulator.get_max_fitness"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.get_max_fitness">[docs]</a>    <span class="k">def</span> <span class="nf">get_max_fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the maximum fitness of over all iterations</span>
+
+<span class="sd">        :return: list of the maximum fitness over all iterations</span>
+<span class="sd">        :rtype: 1Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_fitness</span>
+</div>
+<div class="viewcode-block" id="Simulator.get_min_fitness"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.get_min_fitness">[docs]</a>    <span class="k">def</span> <span class="nf">get_min_fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the minimum fitness of over all iterations</span>
+
+<span class="sd">        :return: list of the minimum fitness over all iterations</span>
+<span class="sd">        :rtype: 1Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span>
+</div>
+<div class="viewcode-block" id="Simulator.initilize_population"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.initilize_population">[docs]</a>    <span class="k">def</span> <span class="nf">initilize_population</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initilize the first population to a random set fo solutions</span>
+
+<span class="sd">        :param distance_matrix: distance matrix for points in the dataset</span>
+<span class="sd">        :return: a random population of solutions</span>
+<span class="sd">        :rtype: 2Darray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Beginning simulation...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generator</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.perform_selection"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.perform_selection">[docs]</a>    <span class="k">def</span> <span class="nf">perform_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the selection operator to a population</span>
+
+<span class="sd">        :param population: the population to apply the operator too</span>
+<span class="sd">        :param distance_matrix: distance matrix for points in the dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">selection</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.perform_crossover"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.perform_crossover">[docs]</a>    <span class="k">def</span> <span class="nf">perform_crossover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the crossover operator to a population</span>
+
+<span class="sd">        :param population: the population to apply the operator too</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crossover</span><span class="o">.</span><span class="n">crossover</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.perform_mutation"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.perform_mutation">[docs]</a>    <span class="k">def</span> <span class="nf">perform_mutation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the mutation operator to a population</span>
+
+<span class="sd">        :param population: the population to apply the operator too</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutator</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.score"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.score">[docs]</a>    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Score function runs the genetic algorithm and returns the best</span>
+<span class="sd">        fitness achieved.</span>
+
+<span class="sd">        This is useful in parameter tuning to evaluate the settings of the GA.</span>
+
+<span class="sd">        :param X: the data to run the GA with</span>
+<span class="sd">        :return: an integer representing the best fitness achieved by this GA</span>
+<span class="sd">        :rtype: Int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_fitness</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.set_params"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the parameters of the GA</span>
+
+<span class="sd">        This takes a flat dictionary of keyword arguments for each of the</span>
+<span class="sd">        components of the GA. Parameters must be named according to the</span>
+<span class="sd">        convention &#39;&lt;component&gt;_&lt;param name&gt;&#39;. E.g. &#39;crossover_pcross&#39;.</span>
+
+<span class="sd">        This format is require for integration with scikit-learn tools, such as</span>
+<span class="sd">        the ParameterGrid function.</span>
+
+<span class="sd">        :param parameters: dictionary of parameters for the GA.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="c"># load params for simulator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_elites</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s">&#39;num_elites&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_epochs</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s">&#39;num_epochs&#39;</span><span class="p">]</span>
+
+        <span class="c"># load params for sub components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_component</span><span class="p">(</span><span class="s">&#39;generator&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="s">&#39;population_generation&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_component</span><span class="p">(</span><span class="s">&#39;selector&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="s">&#39;selection&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crossover</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_component</span><span class="p">(</span><span class="s">&#39;crossover&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="s">&#39;crossover&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_component</span><span class="p">(</span><span class="s">&#39;mutator&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="s">&#39;mutation&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.load_component"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.simulator.Simulator.load_component">[docs]</a>    <span class="k">def</span> <span class="nf">load_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">module_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads a sub component of the GA.</span>
+
+<span class="sd">        This method dynamically sets up an instance of a class defined by the</span>
+<span class="sd">        parameters passed to the system.</span>
+
+<span class="sd">        :param name: the name of the type of component to load</span>
+<span class="sd">        :param params: the parameter dictionary defining the algorithm</span>
+<span class="sd">        :param module_name: the name of the python module to load from</span>
+<span class="sd">        :return: a new instance of the component with it&#39;s paramters set</span>
+<span class="sd">        :rtype: Object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s">&quot;tspsolver.ga.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">])</span>
+        <span class="n">class_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
+        <span class="n">params_for_class</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span><span class="p">):</span>
+                <span class="c"># find all parameters matching the prefix of this sub component</span>
+                <span class="c"># parameters for a sub component must begin with the component</span>
+                <span class="c"># name</span>
+                <span class="n">new_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">params_for_class</span><span class="p">[</span><span class="n">new_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">class_obj</span><span class="p">(</span><span class="o">**</span><span class="n">params_for_class</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Samuel Jackson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tspsolver.ga.crossover &mdash; TSP Solver 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="TSP Solver 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for tspsolver.ga.crossover</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+
+<div class="viewcode-block" id="AbstractCrossoverOperator"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.crossover.AbstractCrossoverOperator">[docs]</a><span class="k">class</span> <span class="nc">AbstractCrossoverOperator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcross</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">use_rog</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pcross</span> <span class="o">=</span> <span class="n">pcross</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_rog</span> <span class="o">=</span> <span class="n">use_rog</span>
+
+<div class="viewcode-block" id="AbstractCrossoverOperator.crossover"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.crossover.AbstractCrossoverOperator.crossover">[docs]</a>    <span class="k">def</span> <span class="nf">crossover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Peform crossover between pairs in a population</span>
+
+<span class="sd">        :param population: 2darray of solutions to perform crossover on.</span>
+<span class="sd">        :return: a new population with generated from the old one.</span>
+<span class="sd">        :rtype: ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">pop</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">population</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[::</span><span class="mi">2</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pcross</span><span class="p">:</span>
+                <span class="n">pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_rog</span><span class="p">:</span>
+                <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rog_shuffle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span>
+                <span class="n">pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crossover_for_chromosomes</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span>
+                <span class="n">pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pop</span><span class="p">)</span>
+</div>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_crossover_for_chromosomes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Peform crossover between a single pair in a population</span>
+
+<span class="sd">        :param x: first parent to perform crossover on.</span>
+<span class="sd">        :param y: second parent to perform crossover on.</span>
+<span class="sd">        :return: two new solutions with generated from the parents.</span>
+<span class="sd">        :rtype: tuple of arrays</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_parent_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Randomly generate pairs of solutions to act as parents.</span>
+
+<span class="sd">        This will iterate until a population of the same size has been</span>
+<span class="sd">        generated.</span>
+
+<span class="sd">        :param population: first parent to perform crossover on.</span>
+<span class="sd">        :return: a tuple containg two solutions to act as parents.</span>
+<span class="sd">        :rtype: (ndarray, ndarray)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pop_size</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">pop_size</span><span class="p">):</span>
+            <span class="n">x_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">pop_size</span><span class="p">)</span>
+            <span class="n">y_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">pop_size</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">population</span><span class="p">[</span><span class="n">x_idx</span><span class="p">],</span> <span class="n">population</span><span class="p">[</span><span class="n">y_idx</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_rog_shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make Randomly Generated Offspring.</span>
+
+<span class="sd">        This is applied in the case that both parents are identical, suggesting</span>
+<span class="sd">        that their is a lack of diversity in the population. Instead of combining</span>
+<span class="sd">        to give identical children (clones), we randomly shuffle the parents</span>
+<span class="sd">        to reintroduce diversity.</span>
+
+<span class="sd">        :param x: first parent to perform crossover on.</span>
+<span class="sd">        :param y: second parent to perform crossover on.</span>
+<span class="sd">        :return: two new solutions with generated from the parents.</span>
+<span class="sd">        :rtype: tuple of arrays</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span>
+
+</div>
+<div class="viewcode-block" id="OnePointPMX"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.crossover.OnePointPMX">[docs]</a><span class="k">class</span> <span class="nc">OnePointPMX</span><span class="p">(</span><span class="n">AbstractCrossoverOperator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a new population using one point PMX crossover. The pivot location</span>
+<span class="sd">    of the split is determined uniformly at random.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_crossover_for_chromosomes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">pivot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c"># copy subtours to children</span>
+        <span class="n">subtour1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="n">pivot</span><span class="p">]</span>
+        <span class="n">subtour2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="n">pivot</span><span class="p">]</span>
+        <span class="n">child1</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">child2</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">child1</span><span class="p">[:</span><span class="n">pivot</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtour1</span>
+        <span class="n">child2</span><span class="p">[:</span><span class="n">pivot</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtour2</span>
+
+        <span class="c"># replace missing parts from other chromosomes</span>
+        <span class="n">subtour_size</span> <span class="o">=</span> <span class="n">subtour1</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c"># create partial mappings</span>
+        <span class="n">child1_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">child2_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subtour1</span><span class="p">,</span> <span class="n">subtour2</span><span class="p">):</span>
+            <span class="n">child1_mapping</span><span class="p">[</span><span class="n">s1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s2</span>
+            <span class="n">child2_mapping</span><span class="p">[</span><span class="n">s2</span><span class="p">]</span> <span class="o">=</span> <span class="n">s1</span>
+
+        <span class="c"># repair chromosomes using partial mappings</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">pivot</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="n">subtour_size</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">if</span> <span class="n">child2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">in</span> <span class="n">child1_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">child2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">child1_mapping</span><span class="p">[</span><span class="n">child2</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">pivot</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="n">subtour_size</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">if</span> <span class="n">child1</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">in</span> <span class="n">child2_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">child1</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">child2_mapping</span><span class="p">[</span><span class="n">child1</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">child1</span><span class="p">,</span> <span class="n">child2</span>
+
+</div>
+<div class="viewcode-block" id="TwoPointPMX"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.crossover.TwoPointPMX">[docs]</a><span class="k">class</span> <span class="nc">TwoPointPMX</span><span class="p">(</span><span class="n">AbstractCrossoverOperator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a new population using one point PMX crossover. The pivot location</span>
+<span class="sd">    of the split is determined uniformly at random.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_crossover_for_chromosomes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">pivot1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">pivot2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="c"># copy subtours to children</span>
+        <span class="n">subtour1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span>
+        <span class="n">subtour2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span>
+        <span class="n">child1</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">child2</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">child1</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtour1</span>
+        <span class="n">child2</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtour2</span>
+
+        <span class="c"># replace missing parts from other chromosomes</span>
+        <span class="n">subtour_size</span> <span class="o">=</span> <span class="n">subtour1</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c"># create partial mappings</span>
+        <span class="n">child1_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">child2_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subtour1</span><span class="p">,</span> <span class="n">subtour2</span><span class="p">):</span>
+            <span class="n">child1_mapping</span><span class="p">[</span><span class="n">s1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s2</span>
+            <span class="n">child2_mapping</span><span class="p">[</span><span class="n">s2</span><span class="p">]</span> <span class="o">=</span> <span class="n">s1</span>
+
+        <span class="c"># repair chromosomes using partial mappings</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pivot2</span><span class="p">,</span> <span class="n">pivot2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="n">subtour_size</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">if</span> <span class="n">child2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">in</span> <span class="n">child1_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">child2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">child1_mapping</span><span class="p">[</span><span class="n">child2</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pivot2</span><span class="p">,</span> <span class="n">pivot2</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="n">subtour_size</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">if</span> <span class="n">child1</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">in</span> <span class="n">child2_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">child1</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">child2_mapping</span><span class="p">[</span><span class="n">child1</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">child1</span><span class="p">,</span> <span class="n">child2</span>
+
+</div>
+<div class="viewcode-block" id="OrderCrossover"><a class="viewcode-back" href="../../../tspsolver.ga.html#tspsolver.ga.crossover.OrderCrossover">[docs]</a><span class="k">class</span> <span class="nc">OrderCrossover</span><span class="p">(</span><span class="n">AbstractCrossoverOperator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new population by keeping a subtour of the chromosome</span>
+<span class="sd">        and then copying from the other parent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_crossover_for_chromosomes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="c"># find subtours</span>
+            <span class="n">pivot1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">pivot2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">subtour1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span>
+            <span class="n">subtour2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span>
+
+            <span class="c"># copy subtours to children</span>
+            <span class="n">child1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">child1</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c"># fill with invalid number</span>
+            <span class="n">child2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">child2</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c"># fill with invalid number</span>
+            <span class="n">child1</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtour1</span>
+            <span class="n">child2</span><span class="p">[</span><span class="n">pivot1</span><span class="p">:</span><span class="n">pivot2</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtour2</span>
+
+            <span class="c"># replace missing parts from other chromosomes</span>
+            <span class="n">subtour_size</span> <span class="o">=</span> <span class="n">subtour1</span><span class="o">.</span><span class="n">size</span>
+
+            <span class="n">child1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_from_parent</span><span class="p">(</span><span class="n">child1</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pivot2</span><span class="p">,</span> <span class="n">subtour_size</span><span class="p">)</span>
+            <span class="n">child2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_from_parent</span><span class="p">(</span><span class="n">child2</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pivot2</span><span class="p">,</span> <span class="n">subtour_size</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">child1</span><span class="p">,</span> <span class="n">child2</span>
+
+        <span class="k">def</span> <span class="nf">_replace_from_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">tour_size</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">pos</span> <span class="o">+</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="n">tour_size</span><span class="p">)):</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="n">parent</span><span class="o">.</span><span class="n">size</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">index</span>
+                <span class="k">while</span> <span class="n">parent</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">in</span> <span class="n">child</span><span class="p">:</span>
+                    <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">%</span> <span class="n">parent</span><span class="o">.</span><span class="n">size</span>
+
+                <span class="n">child</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">child</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Samuel Jackson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

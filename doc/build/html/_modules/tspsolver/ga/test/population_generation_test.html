@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tspsolver.ga.test.population_generation_test &mdash; TSP Solver 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="TSP Solver 0.1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for tspsolver.ga.test.population_generation_test</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">nose.tools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance_matrix</span>
+
+<span class="kn">from</span> <span class="nn">tspsolver.tsp_generator</span> <span class="kn">import</span> <span class="n">TSPGenerator</span>
+<span class="kn">from</span> <span class="nn">..population_generation</span> <span class="kn">import</span> <span class="n">SimplePopulationGenerator</span><span class="p">,</span> <span class="n">KNNPopulationGenerator</span>
+
+
+<div class="viewcode-block" id="SimplePopulationGeneratorTest"><a class="viewcode-back" href="../../../../tspsolver.ga.test.html#tspsolver.ga.test.population_generation_test.SimplePopulationGeneratorTest">[docs]</a><span class="k">class</span> <span class="nc">SimplePopulationGeneratorTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SimplePopulationGeneratorTest.setUp"><a class="viewcode-back" href="../../../../tspsolver.ga.test.html#tspsolver.ga.test.population_generation_test.SimplePopulationGeneratorTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_points</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span> <span class="o">=</span> <span class="mi">20</span>
+
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">TSPGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distances</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimplePopulationGeneratorTest.test_generate_population"><a class="viewcode-back" href="../../../../tspsolver.ga.test.html#tspsolver.ga.test.population_generation_test.SimplePopulationGeneratorTest.test_generate_population">[docs]</a>    <span class="k">def</span> <span class="nf">test_generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">popGen</span> <span class="o">=</span> <span class="n">SimplePopulationGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">)</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="n">popGen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+        <span class="n">nose</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">population</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_points</span><span class="p">))</span>
+        <span class="n">unique_pop</span> <span class="o">=</span> <span class="n">find_unique_rows</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+        <span class="n">nose</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">unique_pop</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">population</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="KNNPopulationGeneratorTest"><a class="viewcode-back" href="../../../../tspsolver.ga.test.html#tspsolver.ga.test.population_generation_test.KNNPopulationGeneratorTest">[docs]</a><span class="k">class</span> <span class="nc">KNNPopulationGeneratorTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="KNNPopulationGeneratorTest.setUp"><a class="viewcode-back" href="../../../../tspsolver.ga.test.html#tspsolver.ga.test.population_generation_test.KNNPopulationGeneratorTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_points</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">TSPGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distances</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="KNNPopulationGeneratorTest.test_generate_population"><a class="viewcode-back" href="../../../../tspsolver.ga.test.html#tspsolver.ga.test.population_generation_test.KNNPopulationGeneratorTest.test_generate_population">[docs]</a>    <span class="k">def</span> <span class="nf">test_generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">popGen</span> <span class="o">=</span> <span class="n">KNNPopulationGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">)</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="n">popGen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+        <span class="n">nose</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">population</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_points</span><span class="p">))</span>
+        <span class="n">nose</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">,</span> <span class="n">population</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+</div></div>
+<div class="viewcode-block" id="find_unique_rows"><a class="viewcode-back" href="../../../../tspsolver.ga.test.html#tspsolver.ga.test.population_generation_test.find_unique_rows">[docs]</a><span class="k">def</span> <span class="nf">find_unique_rows</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find all of the unique rows in a matrix</span>
+
+<span class="sd">    Code modified from:</span>
+<span class="sd">    http://stackoverflow.com/questions/16970982/find-unique-rows-in-numpy-array</span>
+
+<span class="sd">    :param matrix: matrix which may contain identical rows</span>
+<span class="sd">    :return: matrix with identical rows removed.</span>
+<span class="sd">    :rtype: ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">void</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Samuel Jackson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
