@@ -48,7 +48,7 @@ class GeneticAlgorithmParameterEstimation():
                 fitness = Simulator(**setting).score(dataset)
                 param_fitness.append(fitness)
 
-            median_fitness = np.median(param_fitness)# mean_fitness = float(mean_fitness) / self._num_datasets
+            median_fitness = np.median(param_fitness)
             self._param_fitness.append(median_fitness)
 
         param_data['fitness'] = self._param_fitness

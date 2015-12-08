@@ -29,8 +29,10 @@ class TuningTest(unittest.TestCase):
 
         tuner = GeneticAlgorithmParameterEstimation(num_datasets=3,
                                                     dataset_size=20)
-        best_params = tuner.perform_grid_search(params)
+        results = tuner.perform_grid_search(params)
+        best_params = results.ix[results['fitness'].idxmin()]
 
         # check the parameters we were tuning are as expected.
         nose.tools.assert_equals(1000, best_params['num_epochs'])
         nose.tools.assert_equals(3, best_params['num_elites'])
+        nose.tools.assert_equals((9, 12), results.shape)

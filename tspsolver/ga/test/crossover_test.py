@@ -41,13 +41,14 @@ class OnePointCrossoverTest(unittest.TestCase):
             nose.tools.assert_equal(np.unique(row).size, row.size)
 
     def test_crossover_with_rog(self):
-        onept_pmx = OnePointPMX(use_rog=True)
+        onept_pmx = OnePointPMX(pcross=1.0, use_rog=True)
         pop = np.array([np.arange(10), np.arange(10)])
         new_pop = onept_pmx.crossover(pop)
 
         nose.tools.assert_equal(new_pop.shape, pop.shape)
         for row, new_row in zip(pop, new_pop):
             nose.tools.assert_equal(np.unique(new_row).size, new_row.size)
+            print row, new_row
             nose.tools.assert_false(np.array_equal(row, new_row))
 
 
