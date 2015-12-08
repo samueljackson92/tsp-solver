@@ -8,7 +8,6 @@ Subpackages
 
     tspsolver.ga
     tspsolver.generator
-    tspsolver.test
 
 Module contents
 ---------------
